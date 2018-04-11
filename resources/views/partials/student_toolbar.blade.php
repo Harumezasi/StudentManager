@@ -11,3 +11,4 @@
 <span><a href="{{ route('student.attendance') }}">@lang('attendance.title')</a></span>
 <span><a href="{{ route('student.lecture') }}">@lang('lecture.title')</a></span>
 <span><a href="{{ route('student.counsel') }}">@lang('counsel.title')</a></span>
+<span><a href="{{ route('student.attendance.graph') }}">그래프</a></span>

@@ -70,6 +70,12 @@ Route::name('student.')->group(function() {
             'uses'  => 'StudentController@store'
         ]);
 
+        // 학생 출석 그래프 가져오기
+        Route::get('/attendance/graph', [
+            'as'    => 'attendance.graph',
+            'uses'  => 'StudentController@getAttendanceGraph'
+        ]);
+
         // 학생 계정 접속 이후 사용하는 기능들 => 로그인 여부 확인
         Route::middleware(['check.login'])->group(function() {
 

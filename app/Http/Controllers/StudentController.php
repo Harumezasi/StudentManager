@@ -276,6 +276,24 @@ class StudentController extends Controller {
         return view('student_attendance', $data);
     }
 
+    public function getAttendanceGraph(Request $request) {
+        $stdId = $request->get('id');
+        $period = 'weekly';
+        $date = null;
+
+        $attendanceData =
+            app('App\Http\Controllers\AttendanceController')->getAttendanceRecords($stdId, $period, $date);
+
+        $data = [
+            'attendance'    => $attendanceData['query_result']->{ConstantEnum::ATTENDANCE['ada']},
+            'late'          => $attendanceData['query_result']->{ConstantEnum::ATTENDANCE['late']},
+            'absence'       => $attendanceData['query_result']->{ConstantEnum::ATTENDANCE['absence']},
+            'early'         => $attendanceData['query_result']->{ConstantEnum::ATTENDANCE['early']}
+        ];
+
+        return view('student_attendance_graph', $data);
+    }
+
     // 03-03. 학업 관리
 
     /**
