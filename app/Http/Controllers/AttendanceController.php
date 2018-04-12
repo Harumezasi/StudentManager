@@ -169,7 +169,7 @@ class AttendanceController extends Controller {
         }
 
         // 출석 데이터 생성
-        if(!Attendance::insertAttendance($student->id)) {
+        if(Attendance::insertAttendance($student->id) === false) {
             return new ResponseObject(
                 'false',
                 '데이터 생성 실패'
@@ -203,7 +203,7 @@ class AttendanceController extends Controller {
         }
 
         // 출석 데이터 생성
-        if(!Attendance::updateAttendanceAtLeaveSchool($student->id)) {
+        if(Attendance::updateAttendanceAtLeaveSchool($student->id) === false) {
             return new ResponseObject(
                 'false',
                 '데이터 생성 실패'
