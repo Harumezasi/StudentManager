@@ -45,7 +45,7 @@
             <td>@lang('myclass.today_positions')</td><!-- 일일 위치확인 -->
 
             <!-- 설정&관리 => 정보 등록 -->
-            <td>@lang('myclass.store_student')</td><!-- 학생 등록 -->
+            <td><a href="{{ route('tutor.config.store.student') }}">@lang('myclass.store_student')</a></td><!-- 학생 등록 -->
             <td>@lang('myclass.store_timetable')</td><!-- 시간표 등록 -->
 
             <!-- 설정&관리 => 교과목교수 -->

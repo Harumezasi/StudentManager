@@ -276,6 +276,7 @@ class StudentController extends Controller {
         return view('student_attendance', $data);
     }
 
+    // 모바일 : 출석율 그래프 그리기
     public function getAttendanceGraph(Request $request) {
         $stdId = $request->get('id');
         $period = 'weekly';
@@ -292,6 +293,24 @@ class StudentController extends Controller {
         ];
 
         return view('student_attendance_graph', $data);
+    }
+
+    // 모바일 : 출석체크
+    public function comeSchool() {
+        $id = session()->get('user')['info']->id;
+
+        return json_encode(
+            app('App\Http\Controllers\AttendanceController')->comeSchool($id)
+        );
+    }
+
+    // 모바일 : 하교하기
+    public function leaveSchool() {
+        $id = session()->get('user')['info']->id;
+
+        return json_encode(
+            app('App\Http\Controllers\AttendanceController')->leaveSchool($id)
+        );
     }
 
     // 03-03. 학업 관리

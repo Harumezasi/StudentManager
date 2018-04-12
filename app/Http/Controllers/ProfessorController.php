@@ -312,13 +312,14 @@ class ProfessorController extends Controller {
     public function storeScoreAtExcel(Request $request) {
         // 01. 전송 데이터 유효성 검사
         $this->validate($request, [
-            'upload_file'       => 'required|file|mimes:xlsx,xls,csv'
+            'upload_file'       => 'required|file|mimes:xlsx,xls,csv',
         ]);
 
         // 02. 변수 설정
         $file = $request->file('upload_file');
+        $fileType = ($array = explode('.', $file->getClientOriginalName()))[sizeof($array) - 1];
 
-        return app('App\Http\Controllers\ExcelController')->importScoreForm($file->path());
+        return app('App\Http\Controllers\ExcelController')->importScoreForm($file->path(), $fileType);
     }
 
     // 성적을 직접 등록하는 페이지를 출력

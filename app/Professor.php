@@ -261,6 +261,7 @@ class Professor extends Model {
         ) > 0;
     }
 
+    // 내 담당 과목을 수강하는 학생 목록
     public function getStudentsListOfMyLecture() {
         return $this->lecture()->get()[0]->signUpLists()
             ->join(DbInfoEnum::STUDENTS['t_name'],
@@ -271,5 +272,15 @@ class Professor extends Model {
                 DbInfoEnum::STUDENTS['t_name'].'.'.DbInfoEnum::STUDENTS['name']
             )
             ->get();
+    }
+
+    // 내 지도 학생을 출력
+    public function selectStudentsOfMyClass($argOrderStyle) {
+        return $this->group()->get()[0]->students()
+            ->join('sign_up_lists', 'students.id', 'sign_up_lists.std_id')
+            ->selectRaw('students.id, students.name, 
+                round((avg(sign_up_lists.achievement) * 100), 0) as "achievement"')
+            ->groupBy('students.id')->orderBy("students.{$argOrderStyle}")
+            ->paginate(10);
     }
 }

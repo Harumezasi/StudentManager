@@ -240,7 +240,6 @@ class TutorController extends Controller {
      *
      * 매개변수 목록
      * @param $argOrder:               정렬 방식
-     * @param $argTerm:                조회 기준 학기
      *
      * 지역변수 목록
      * null
@@ -248,9 +247,15 @@ class TutorController extends Controller {
      * 반환값
      * @return                         \Illuminate\Contracts\View\Factory|\Illuminate\View\View
      */
-    public function manageMyClass($argOrder = 'id', $argTerm = NULL) {
+    public function manageMyClass($argOrder = 'id') {
+        // 01. 변수 설정
+        $professor = Professor::find(session()->get('user')['info']->id);
+        $studentList = $professor->selectStudentsOfMyClass($argOrder);
+
         $data = [
-            'title'         => __('page_title.tutor_myclass_manage')
+            'title'         => __('page_title.tutor_myclass_manage'),
+            'order'         => $argOrder,
+            'student_list'  => $studentList
         ];
 
         return view('tutor_myclass_manage', $data);
@@ -261,4 +266,40 @@ class TutorController extends Controller {
 
 
     // 03-04. 관리 & 설정
+    // 학생 목록 저장 페이지 출력
+    public function getStudentStorePage() {
+        // View 단에 반환할 데이터 바인딩
+        $data = [
+            'title'     => '지도교수: 정보등록',
+        ];
+
+        return view('tutor_config_store_student', $data);
+    }
+
+    // 엑셀을 이용한 학생 목록 조회
+    public function selectStudentsListAtExcel(Request $request) {
+        // 01. 입력값 검증
+        $this->validate($request, [
+            'std_list'  => 'required|file|mimes:xlsx,xls,csv',
+            'student_type'      => 'required|in:freshman,enrolled'
+        ]);
+
+        // 02. 변수 설정
+        $stdType = $request->post('student_type');
+        $file = $request->file('std_list');
+        $fileType = ($array = explode('.', $file->getClientOriginalName()))[sizeof($array) - 1];
+
+
+        return json_encode(app('App\Http\Controllers\ExcelController')->importStudentsList($stdType, $file->path(), $fileType));
+    }
+
+    // 조회한 학생 목록에서 선택된 학생 목록을 저장
+    public function insertStudentsList(Request $request) {
+        // 01. 데이터 유효성 검사
+        $this->validate($request, [
+            'student_list'      => 'required',
+        ]);
+
+        return var_dump($request->post('student_list'));
+    }
 }

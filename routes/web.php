@@ -97,6 +97,18 @@ Route::name('student.')->group(function() {
                 'uses'  => 'StudentController@getAttendanceRecords'
             ]);
 
+            // 등교 인증
+            Route::get('/come_school', [
+                'as'    => 'come_school',
+                'uses'  => 'StudentController@comeSchool'
+            ]);
+
+            // 하교 인증
+            Route::get('/leave_school', [
+                'as'    => 'leave_school',
+                'uses'  => 'StudentController@leaveSchool'
+            ]);
+
             // 학업 관리 기능
             Route::get('/lecture/{date?}', [
                 'as'    => 'lecture',
@@ -147,7 +159,7 @@ Route::name('tutor.')->group(function() {
             // 지도반 관련
 
             // 내 지도반 관리
-            Route::get('/myclass/manage/{order?}/{term?}', [
+            Route::get('/myclass/manage/{order?}', [
                 'as'    => 'myclass.manage',
                 'uses'  => 'TutorController@manageMyClass'
             ]);
@@ -156,6 +168,27 @@ Route::name('tutor.')->group(function() {
             Route::get('/myclass/create', [
                 'as'    => 'myclass.create',
                 'uses'  => 'TutorController@createMyClass'
+            ]);
+
+            // 관리 & 설정
+
+            // 정보 등록
+            // 학생정보 등록 페이지 출력
+            Route::get('/config/store/student', [
+                'as'    => 'config.store.student',
+                'uses'  => 'TutorController@getStudentStorePage'
+            ]);
+
+            // 엑셀 파일을 이용한 페이지 출력
+            Route::post('/config/store/student/excel/select', [
+                'as'    => 'config.store.student.excel.select',
+                'uses'  => 'TutorController@selectStudentsListAtExcel'
+            ]);
+
+            // 조회한 학생 목록에서
+            Route::post('/config/store/student/excel/store', [
+                'as'    => 'config.store.student.excel.insert',
+                'uses'  => 'TutorController@insertStudentsList'
             ]);
         });
     });
