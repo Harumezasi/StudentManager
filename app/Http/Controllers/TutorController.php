@@ -275,9 +275,6 @@ class TutorController extends Controller {
         // 현재 지도교수가 가지고 있는 알림 데이터 확인
         $profId = session()->get('user')['info']->id;
 
-
-
-
         // View 단에 전송할 데이터 추출
         $data = [
             'title' => '관심학생 알림 설정'
