@@ -304,12 +304,40 @@ class StudentController extends Controller {
         );
     }
 
+    // 하드웨어: 출석체크
+    public function comeSchoolHardWare(Request $request) {
+        $this->validate($request, [
+            'req'    => 'required|JSON'
+        ]);
+
+        $reqData    = json_decode($request->post('req'));
+        $stdId      = $reqData->stdId;
+
+        return json_encode(
+            app('App\Http\Controllers\AttendanceController')->comeSchool($stdId)
+        );
+    }
+
     // 모바일 : 하교하기
     public function leaveSchool() {
         $id = session()->get('user')['info']->id;
 
         return json_encode(
             app('App\Http\Controllers\AttendanceController')->leaveSchool($id)
+        );
+    }
+
+    // 하드웨어: 하교하기
+    public function leaveSchoolHardWare(Request $request) {
+        $this->validate($request, [
+            'std_id'    => 'required|JSON'
+        ]);
+
+        $reqData    = json_decode($request->post('std_id'));
+        $stdId      = $reqData->std_id;
+
+        return json_encode(
+            app('App\Http\Controllers\AttendanceController')->leaveSchool($stdId)
         );
     }
 

@@ -76,6 +76,16 @@ Route::name('student.')->group(function() {
             'uses'  => 'StudentController@getAttendanceGraph'
         ]);
 
+        Route::post('/hardware/come_school', [
+            'as'    => 'hardware.come_school',
+            'uses'  => 'StudentController@comeSchoolHardWare'
+        ]);
+
+        Route::post('/hardware/leave_school', [
+            'as'    => 'hardware.leave_school',
+            'uses'  => 'StudentController@leaveSchoolHardWare'
+        ]);
+
         // 학생 계정 접속 이후 사용하는 기능들 => 로그인 여부 확인
         Route::middleware(['check.login'])->group(function() {
 
@@ -141,6 +151,10 @@ Route::name('tutor.')->group(function() {
             'uses'  => 'TutorController@check_join'
         ]);
 
+        Route::post(
+
+        );
+
         // 지도교수 로그인 이후 이용 가능 기능
         Route::middleware(['check.login'])->group(function() {
 
@@ -168,6 +182,12 @@ Route::name('tutor.')->group(function() {
             Route::get('/myclass/create', [
                 'as'    => 'myclass.create',
                 'uses'  => 'TutorController@createMyClass'
+            ]);
+
+            // 관심학생 알림 설정 페이지 출력
+            Route::get('/myclass/needcare', [
+                'as'    => 'myclass.needcare',
+                'uses'  => 'TutorController@viewNeedCareConfig'
             ]);
 
             // 관리 & 설정

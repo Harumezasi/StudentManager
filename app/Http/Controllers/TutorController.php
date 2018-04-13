@@ -261,6 +261,27 @@ class TutorController extends Controller {
         return view('tutor_myclass_manage', $data);
     }
 
+    // 03-03. 알림 설정
+    // 알림 설정 페이지 출력
+    public function viewNeedCareConfig() {
+        $data = [
+            'title' => '관심학생 알림 설정'
+        ];
+
+        return view('tutor_myclass_care', $data);
+    }
+
+    // 알림 설정 데이터 저장
+    public function storeNeedCare(Request $request) {
+        // 01. 유효성 검사
+        $this->validate($request, [
+            'days_unit',
+            'attendance_type',
+            'continuity_flag',
+            'count'             => 'required|',
+            'target'
+        ]);
+    }
 
     // 03-03. 상담 관리
 
