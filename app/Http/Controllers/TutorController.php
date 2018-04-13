@@ -275,12 +275,20 @@ class TutorController extends Controller {
     public function storeNeedCare(Request $request) {
         // 01. 유효성 검사
         $this->validate($request, [
-            'days_unit',
-            'attendance_type',
-            'continuity_flag',
+            'days_unit'         => 'required',
+            'attendance_type'   => 'required',
+            'continuity_flag'   => 'required',
             'count'             => 'required',
-            'target'
+            'target'            => 'required'
         ]);
+
+        $req['days_unit']       = $request->post('days_unit');
+        $req['attendance_type'] = $request->post('attendance_type');
+        $req['continuity_flag'] = $request->post('continuity_flag');
+        $req['count']           = $request->post('count');
+        $req['target']          = $request->post('target');
+
+        return json_encode($req);
     }
 
     // 03-03. 상담 관리

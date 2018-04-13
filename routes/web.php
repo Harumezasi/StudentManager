@@ -186,6 +186,11 @@ Route::name('tutor.')->group(function() {
                 'uses'  => 'TutorController@viewNeedCareConfig'
             ]);
 
+            Route::post('/myclass/needcare/store', [
+                'as'    => 'myclass.needcare.store',
+                'uses'  => 'TutorController@storeNeedCare'
+            ]);
+
             // 관리 & 설정
 
             // 정보 등록

@@ -12,7 +12,8 @@
     <div>
         <h2>알림 추가</h2>
         <span>
-            <form action="" method="post">
+            <form action="{{ route('tutor.myclass.needcare.store') }}" method="post">
+                {{ csrf_field() }}
                 <label>
                     <select name="days_unit">
                         <option value="week">일주일</option>
