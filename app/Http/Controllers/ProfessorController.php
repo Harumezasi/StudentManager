@@ -249,8 +249,12 @@ class ProfessorController extends Controller {
         return view('professor_check_attendance', $data);
     }
 
-    public function getMyStudentsList() {
-        $professor = Professor::find(session()->get('user')['info']->id);
+    public function getMyStudentsList(Request $request) {
+        $this->validate($request, [
+            'id'    => 'required|exists:professors,id'
+        ]);
+
+        $professor = Professor::find($request->get('id'));
         $studentsList = $professor->getStudentsListOfMyLecture();
 
         return json_encode($studentsList);
