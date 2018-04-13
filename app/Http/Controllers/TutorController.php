@@ -265,6 +265,13 @@ class TutorController extends Controller {
     // 03-03. 알림 설정
     // 알림 설정 페이지 출력
     public function viewNeedCareConfig() {
+        // 현재 지도교수가 가지고 있는 알림 데이터 확인
+        $profId = session()->get('user')['info']->id;
+
+
+
+
+        // View 단에 전송할 데이터 추출
         $data = [
             'title' => '관심학생 알림 설정'
         ];
@@ -280,7 +287,8 @@ class TutorController extends Controller {
             'attendance_type'   => 'required',
             'continuity_flag'   => 'required',
             'count'             => 'required',
-            'target'            => 'required'
+            'target'            => 'required',
+            'input_days_unit'   => 'required_if:days_unit,input|numeric'
         ]);
 
         // 데이터 획득
@@ -290,8 +298,80 @@ class TutorController extends Controller {
         $continuity_flag    = $request->post('continuity_flag');
         $count              = $request->post('count');
         $target             = $request->post('target');
+        $input_days_unit    = $request->has('input_days_unit') ? $request->post('input_days_unit') : NULL;
+
+        // 데이터 가공
+        // 관측 기간
+        $days = null;
+        switch($days_unit) {
+            case 'week':
+                $days = 7;
+                break;
+            case 'month':
+                $days = 30;
+                break;
+            case 'input':
+                $days = $input_days_unit;
+                break;
+        };
+
+
+        $notification_flag = null;
+        switch($continuity_flag) {
+            case true:
+            case 'true':
+                switch($attendance_type) {
+                    case 'late':
+                        $notification_flag = 0;
+                        break;
+                    case 'early':
+                        $notification_flag = 1;
+                        break;
+                    case 'absence':
+                        $notification_flag = 2;
+                        break;
+                }
+                break;
+            case false:
+            case 'false':
+                switch($attendance_type) {
+                    case 'late':
+                        $notification_flag = 3;
+                        break;
+                    case 'early':
+                        $notification_flag = 4;
+                        break;
+                    case 'absence':
+                        $notification_flag = 5;
+                        break;
+                }
+                break;
+        }
+
+        // 알림 대상 설정
+        $alertStd = false;
+        $alertProf = false;
+        switch($target) {
+            case 'tutor':
+                $alertProf = true;
+                break;
+            case 'student':
+                $alertStd = true;
+                break;
+            case 'both':
+                $alertProf = true;
+                $alertStd = true;
+                break;
+        }
+
 
         // 알림 설정 저장
+        if(NeedCareAlert::insert($myId, $days, $notification_flag, $count, $alertStd, $alertProf) != false) {
+            flash()->success('알림 추가하였습니다.');
+        } else {
+            flash()->error('알림 추가에 실패하였습니다.');
+        }
+        return back();
     }
 
     // 03-03. 상담 관리

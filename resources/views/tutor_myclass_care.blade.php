@@ -24,10 +24,9 @@
                 동안
                 <label>
                     <select name="attendance_type">
-                        <option value="1">출석</option>
-                        <option value="2">지각</option>
-                        <option value="3">결석</option>
-                        <option value="4">조퇴</option>
+                        <option value="late">지각</option>
+                        <option value="absence">결석</option>
+                        <option value="early">조퇴</option>
                     </select>
                 </label>
                 을
@@ -37,7 +36,7 @@
                         <option value="false">누적</option>
                     </select>
                 </label>
-                <input type="number" name="count" max="99">
+                <input type="number" name="count" min="1" max="99" required>
                 회 이상 할 경우
                 <label>
                     <select name="target">
@@ -68,10 +67,10 @@
                 $(this).change(function() {
                     if($(this).val() === 'input') {
                         $(this).parent().append(
-                            $('<input type="text" name="input_days_unit">')
+                            $('<input type="number" min="1" max="99" name="input_days_unit" required>')
                         );
                     } else {
-
+                        $(this).next().remove();
                     }
                 });
             });

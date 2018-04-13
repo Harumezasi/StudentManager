@@ -14,7 +14,7 @@ class VerifyCsrfToken extends Middleware
 
     protected $except = [
         //
-        'http://13.124.213.132/student/hardware/come_school',
-        'http://13.124.213.132/student/hardware/leave_school',
+        '/student/hardware/come_school',
+        '/student/hardware/leave_school',
     ];
 }

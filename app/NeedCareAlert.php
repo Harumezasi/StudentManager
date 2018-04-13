@@ -49,7 +49,7 @@ class NeedCareAlert extends Model {
 
         $alert->manager = $professor->id;
         $alert->days_unit = $argDays;
-        $alert->notification = $argNotification;
+        $alert->notification_flag = $argNotification;
         $alert->needed_count = $argNeededCount;
         $alert->alert_std_flag = $argAlertStd;
         $alert->alert_prof_flag = $argAlertTutor;
