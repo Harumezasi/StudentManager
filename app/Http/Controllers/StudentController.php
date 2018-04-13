@@ -307,14 +307,13 @@ class StudentController extends Controller {
     // 하드웨어: 출석체크
     public function comeSchoolHardWare(Request $request) {
         $this->validate($request, [
-            'req'    => 'required|JSON'
+            'stdId'    => 'required|JSON'
         ]);
 
-        $reqData    = json_decode($request->post('req'));
-        $stdId      = $reqData->stdId;
+        $reqData    = json_decode($request->post('stdId'));
 
         return json_encode(
-            app('App\Http\Controllers\AttendanceController')->comeSchool($stdId)
+            app('App\Http\Controllers\AttendanceController')->comeSchool($reqData)
         );
     }
 
@@ -330,14 +329,13 @@ class StudentController extends Controller {
     // 하드웨어: 하교하기
     public function leaveSchoolHardWare(Request $request) {
         $this->validate($request, [
-            'req'    => 'required|JSON'
+            'stdId'    => 'required|JSON'
         ]);
 
-        $reqData    = json_decode($request->post('req'));
-        $stdId      = $reqData->stdId;
+        $reqData    = json_decode($request->post('stdId'));
 
         return json_encode(
-            app('App\Http\Controllers\AttendanceController')->leaveSchool($stdId)
+            app('App\Http\Controllers\AttendanceController')->leaveSchool($reqData)
         );
     }
 
