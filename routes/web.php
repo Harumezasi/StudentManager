@@ -233,6 +233,11 @@ Route::name('professor.')->group(function() {
            'uses'  => 'ProfessorController@store'
        ]);
 
+
+       // 학생 관리
+       // 프론트엔드 : 학생 리스트 조회
+       Route::get('/students_list', 'ProfessorController@getMyStudentsList');
+
        // 교과목교수 로그인 이후 사용 가능 기능
        Route::middleware(['check.login'])->group(function() {
 
@@ -251,9 +256,6 @@ Route::name('professor.')->group(function() {
                'uses'   => 'ProfessorController@checkAttendance'
            ]);
 
-           // 학생 관리
-           // 프론트엔드 : 학생 리스트 조회
-           Route::get('/students_list', 'ProfessorController@getMyStudentsList');
 
            // 성적 조회
            Route::get('/details/scores/{stdId}', [
