@@ -278,8 +278,8 @@ class Professor extends Model {
     public function selectStudentsOfMyClass($argOrderStyle) {
         return $this->group()->get()[0]->students()
             ->join('sign_up_lists', 'students.id', 'sign_up_lists.std_id')
-            ->selectRaw('students.id, students.name, students.face_photo,
-                round((avg(sign_up_lists.achievement) * 100), 0) as "achievement"')
+            ->selectRaw('students.id, students.name, students.face_photo, '.
+                'round((avg(sign_up_lists.achievement) * 100), 0) as "achievement"')
             ->groupBy('students.id')->orderBy("students.{$argOrderStyle}")
             ->paginate(10);
     }
