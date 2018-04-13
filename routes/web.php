@@ -151,10 +151,6 @@ Route::name('tutor.')->group(function() {
             'uses'  => 'TutorController@check_join'
         ]);
 
-        Route::post(
-
-        );
-
         // 지도교수 로그인 이후 이용 가능 기능
         Route::middleware(['check.login'])->group(function() {
 

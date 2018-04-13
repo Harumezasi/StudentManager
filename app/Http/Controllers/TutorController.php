@@ -278,7 +278,7 @@ class TutorController extends Controller {
             'days_unit',
             'attendance_type',
             'continuity_flag',
-            'count'             => 'required|',
+            'count'             => 'required',
             'target'
         ]);
     }
