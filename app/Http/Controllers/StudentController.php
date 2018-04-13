@@ -306,6 +306,7 @@ class StudentController extends Controller {
 
     // 하드웨어: 출석체크
     public function comeSchoolHardWare(Request $request) {
+        /*
         $this->validate($request, [
             'req'    => 'required|JSON'
         ]);
@@ -315,7 +316,9 @@ class StudentController extends Controller {
 
         return json_encode(
             app('App\Http\Controllers\AttendanceController')->comeSchool($stdId)
-        );
+        );*/
+
+        return $request;
     }
 
     // 모바일 : 하교하기

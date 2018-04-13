@@ -292,7 +292,6 @@ class TutorController extends Controller {
         $target             = $request->post('target');
 
         // 알림 설정 저장
-        NeedCareAlert::insert();
     }
 
     // 03-03. 상담 관리
