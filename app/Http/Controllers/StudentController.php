@@ -330,11 +330,11 @@ class StudentController extends Controller {
     // 하드웨어: 하교하기
     public function leaveSchoolHardWare(Request $request) {
         $this->validate($request, [
-            'std_id'    => 'required|JSON'
+            'req'    => 'required|JSON'
         ]);
 
-        $reqData    = json_decode($request->post('std_id'));
-        $stdId      = $reqData->std_id;
+        $reqData    = json_decode($request->post('req'));
+        $stdId      = $reqData->stdId;
 
         return json_encode(
             app('App\Http\Controllers\AttendanceController')->leaveSchool($stdId)
