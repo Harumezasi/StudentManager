@@ -54,6 +54,27 @@
     <!-- 알림 확인 -->
     <div>
         <h2>알림 설정</h2>
+        <select name="days_unit">
 
+        </select>
     </div>
+@endsection
+@section('script')
+    <script language="JavaScript">
+        $(document).ready(function() {
+            // 기간 선택자 이벤트 설정 (사용자가 직접 입력을 선택하면 => 입력창 출력
+            $('select[name=days_unit]').each(function () {
+
+                $(this).change(function() {
+                    if($(this).val() === 'input') {
+                        $(this).parent().append(
+                            $('<input type="text" name="input_days_unit">')
+                        );
+                    } else {
+
+                    }
+                });
+            });
+        });
+    </script>
 @endsection

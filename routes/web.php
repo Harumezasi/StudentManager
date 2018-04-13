@@ -76,7 +76,7 @@ Route::name('student.')->group(function() {
             'uses'  => 'StudentController@getAttendanceGraph'
         ]);
 
-        Route::post('/hardware/come_school', [
+        Route::get('/hardware/come_school', [
             'as'    => 'hardware.come_school',
             'uses'  => 'StudentController@comeSchoolHardWare'
         ]);

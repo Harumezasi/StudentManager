@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\NeedCareAlert;
 use App\Professor;
 use App\Group;
 use App\Http\Controllers\ConstantEnum;
@@ -282,13 +283,16 @@ class TutorController extends Controller {
             'target'            => 'required'
         ]);
 
-        $req['days_unit']       = $request->post('days_unit');
-        $req['attendance_type'] = $request->post('attendance_type');
-        $req['continuity_flag'] = $request->post('continuity_flag');
-        $req['count']           = $request->post('count');
-        $req['target']          = $request->post('target');
+        // 데이터 획득
+        $myId               = session()->get('user')['info']->id;
+        $days_unit          = $request->post('days_unit');
+        $attendance_type    = $request->post('attendance_type');
+        $continuity_flag    = $request->post('continuity_flag');
+        $count              = $request->post('count');
+        $target             = $request->post('target');
 
-        return json_encode($req);
+        // 알림 설정 저장
+        NeedCareAlert::insert();
     }
 
     // 03-03. 상담 관리
