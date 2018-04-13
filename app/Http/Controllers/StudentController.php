@@ -55,6 +55,15 @@ class StudentController extends Controller {
             'title'     => __('page_title.student_index')
         ];
 
+        $students = Student::all()->all();
+
+        foreach($students as $key => $student) {
+            $photoNum = sprintf('%02d', ($key + 1));
+
+            $student->face_photo = "std{$photoNum}.jpg";
+            $student->save();
+        }
+
         return view('student_main', $data);
     }
 
@@ -434,3 +443,4 @@ class StudentController extends Controller {
         return view('student_counsel', $data);
     }
 }
+
