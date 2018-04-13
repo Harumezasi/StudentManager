@@ -252,6 +252,9 @@ Route::name('professor.')->group(function() {
            ]);
 
            // 학생 관리
+           // 프론트엔드 : 학생 리스트 조회
+           Route::get('/students_list', 'ProfessorController@getMyStudentsList');
+
            // 성적 조회
            Route::get('/details/scores/{stdId}', [
                 'as'    => 'details.scores',

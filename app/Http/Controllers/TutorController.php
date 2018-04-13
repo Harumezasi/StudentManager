@@ -262,6 +262,13 @@ class TutorController extends Controller {
         return view('tutor_myclass_manage', $data);
     }
 
+    // 모바일
+    public function getMyStudentsListAtAndroid() {
+        $profId = session()->get('user')['info']->id;
+
+        $studentsList = Professor::get($profId)->selectStudentsOfMyClass();
+    }
+
     // 03-03. 알림 설정
     // 알림 설정 페이지 출력
     public function viewNeedCareConfig() {
