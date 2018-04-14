@@ -7,6 +7,7 @@ use App\Professor;
 use App\Group;
 use App\Http\Controllers\ConstantEnum;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Facade;
 use PHPUnit\Util\RegularExpression;
 
 /**
@@ -256,17 +257,40 @@ class TutorController extends Controller {
         $data = [
             'title'         => __('page_title.tutor_myclass_manage'),
             'order'         => $argOrder,
-            'student_list'  => $studentList
+            'student_list'  => $studentList->paginate(10)
         ];
 
         return view('tutor_myclass_manage', $data);
     }
 
-    // 모바일
-    public function getMyStudentsListAtAndroid() {
-        $profId = session()->get('user')['info']->id;
+    // 모바일 => 내 학생 리스트 가져오기
+    public function getMyStudentsListAtAndroid(Request $request) {
+        // 유효성 검증
+        $this->validate($request, [
+            'order_style'   => 'in:id,name'
+        ]);
 
-        $studentsList = Professor::get($profId)->selectStudentsOfMyClass();
+        // 데이터 획득
+        $profId = session()->get('user')['info']->id;
+        $orderStyle = $request->exists('order_style') ? $request->get('order_style') : 'id';
+
+        $queryList = Professor::find($profId)->selectStudentsOfMyClass($orderStyle);
+
+        // 데이터 추출
+        $studentsList = [];
+        foreach($queryList->get()->all() as $student) {
+            $photoFileUrl = strlen($student->face_photo) > 0 ?
+                url("/source/std_face/{$student->face_photo}") : url('/source/std_face/dummy.jpg');
+
+            $studentsList[] = [
+                'id'            => $student->id,
+                'name'          => $student->name,
+                'achievement'   => $student->achievement,
+                'face_photo'    => $photoFileUrl
+            ];
+        }
+
+        return json_encode($studentsList);
     }
 
     // 03-03. 알림 설정

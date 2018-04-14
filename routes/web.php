@@ -174,6 +174,9 @@ Route::name('tutor.')->group(function() {
                 'uses'  => 'TutorController@manageMyClass'
             ]);
 
+            // 안드로이드 - 내 지도반 학생 리스트 출력
+            Route::get('/myclass/student_list', 'TutorController@getMyStudentsListAtAndroid');
+
             // 내 지도반 생성
             Route::get('/myclass/create', [
                 'as'    => 'myclass.create',
@@ -186,6 +189,7 @@ Route::name('tutor.')->group(function() {
                 'uses'  => 'TutorController@viewNeedCareConfig'
             ]);
 
+            // 알림 저장
             Route::post('/myclass/needcare/store', [
                 'as'    => 'myclass.needcare.store',
                 'uses'  => 'TutorController@storeNeedCare'

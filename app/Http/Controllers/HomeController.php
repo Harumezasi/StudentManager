@@ -56,6 +56,7 @@ class HomeController extends Controller {
             'user_type'     => ConstantEnum::USER_TYPE
         ];
 
+
         return view('login', $data);
     }
 
