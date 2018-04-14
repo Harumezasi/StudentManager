@@ -279,4 +279,9 @@ class Student extends Model {
          * ->paginate(3)
          */
     }
+
+    // 최근의 출석 데이터를 조회
+    public function selectRecentlyAttendanceRecords($startDate, $endDate) {
+
+    }
 }

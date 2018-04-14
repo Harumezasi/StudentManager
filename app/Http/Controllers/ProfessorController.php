@@ -257,7 +257,7 @@ class ProfessorController extends Controller {
         $professor = Professor::find($request->get('id'));
         $studentsList = $professor->getStudentsListOfMyLecture();
 
-        return json_encode($studentsList);
+        return response()->json($studentsList, 200);
     }
 
     // 성적 관리
@@ -352,6 +352,7 @@ class ProfessorController extends Controller {
      * 매개변수 목록
      * @param $argId:                  사용자 ID
      * @param $argPw:                  사용자 패스워드
+     * @param $argDevice:              사용자 접속 기기
      *
      * 지역변수 목록
      * $regMsg(string):                View 단에 반환할 메시지
@@ -361,7 +362,7 @@ class ProfessorController extends Controller {
      * 반환값
      * @return                         \Illuminate\Contracts\View\Factory|\Illuminate\View\View
      */
-    public function login($argId, $argPw) {
+    public function login($argId, $argPw, $argDevice = NULL) {
         // 01. 입력된 아이디를 조회
         $professor = Professor::find($argId);
 
@@ -372,7 +373,7 @@ class ProfessorController extends Controller {
 
             // 해당 사용자가 지도교수 계정인 경우
             if(is_null($professor->manager) && is_null($professor->expire_date)) {
-                return app('App\Http\Controllers\TutorController')->login($professor);
+                return app('App\Http\Controllers\TutorController')->login($professor, $argDevice);
             }
 
             // 해당 사용자가 교과목 교수 계정인 경우
@@ -385,13 +386,28 @@ class ProfessorController extends Controller {
                 ]
             ]);
 
-            flash()->success(__('message.login_success', ['Name' => $professor->name]));
-            return redirect(route('professor.index'));
+            switch($argDevice) {
+                case 'android':
+                    return response()->json(
+                        new ResponseObject("TRUE", __('message.login_success', ['Name' => $professor->name])),
+                        200);
+                    break;
+                default:
+                    flash()->success(__('message.login_success', ['Name' => $professor->name]));
+                    return redirect(route('professor.index'));
+            }
 
         // 잘못된 입력
         } else {
-            flash()->warning(__('message.login_wrong_id_or_password'))->important();
-            return back();
+            switch($argDevice){
+                case 'android':
+                    return response()->json(
+                        new ResponseObject("TRUE", __('message.login_wrong_id_or_password')),
+                        200);
+                default:
+                    flash()->warning(__('message.login_wrong_id_or_password'))->important();
+                    return back();
+            }
         }
     }
 }

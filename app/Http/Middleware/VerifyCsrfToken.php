@@ -16,5 +16,7 @@ class VerifyCsrfToken extends Middleware
         //
         '/student/hardware/come_school',
         '/student/hardware/leave_school',
+
+        '/csrf',
     ];
 }

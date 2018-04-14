@@ -44,6 +44,12 @@ Route::name('home.')->group(function() {
         'as'   => 'forgot',
         'uses' => 'HomeController@forgot'
     ]);
+
+    // CSRF 토큰 요청
+    Route::post('/csrf', [
+        'as'    => 'csrf',
+        'uses'  => 'HomeController@getCSRFToken'
+    ]);
 });
 
 // 회원가입 유형 획득
@@ -167,7 +173,6 @@ Route::name('tutor.')->group(function() {
             ]);
 
             // 지도반 관련
-
             // 내 지도반 관리
             Route::get('/myclass/manage/{order?}', [
                 'as'    => 'myclass.manage',
@@ -176,6 +181,12 @@ Route::name('tutor.')->group(function() {
 
             // 안드로이드 - 내 지도반 학생 리스트 출력
             Route::get('/myclass/student_list', 'TutorController@getMyStudentsListAtAndroid');
+
+            // 학생 상세정보 => 출결 확인
+            Route::get('/details/attendance/{std_id}/{period?}', [
+                'as'    => 'details.attendance',
+                'uses'  => 'TutorController@detailsOfAttendance'
+            ]);
 
             // 내 지도반 생성
             Route::get('/myclass/create', [
@@ -289,6 +300,7 @@ Route::name('professor.')->group(function() {
                 'uses'  => 'ProfessorController@exportScoresExcelForm'
            ]);
 
+           // 엑셀 입력
            Route::post('/scores/store/excel/import', [
                'as'     => 'scores.store.excel.import',
                'uses'   => 'ProfessorController@storeScoreAtExcel'

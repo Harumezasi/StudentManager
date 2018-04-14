@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\NeedCareAlert;
 use App\Professor;
 use App\Group;
+use App\Student;
 use App\Http\Controllers\ConstantEnum;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Facade;
@@ -160,7 +161,7 @@ class TutorController extends Controller {
      * 반환값
      * @return                         \Illuminate\Http\RedirectResponse|\Illuminate\Routing\Redirector
      */
-    public function login(Professor $professor) {
+    public function login(Professor $professor, $argDevice) {
         // 01. 세션에 사용자 정보 등록
         $user_type = self::USER_TYPE;
         session([
@@ -170,16 +171,15 @@ class TutorController extends Controller {
             ]
         ]);
 
-        flash()->success(__('message.login_success', ['Name' => $professor->name]));
-        return redirect(route('tutor.index'));
-    }
-
-    public function info() {
-        $data = [
-            'title'             => __('page_title.tutor_info'),
-        ];
-
-        return view('tutor_info', $data);
+        switch($argDevice) {
+            case 'android':
+                return response()->json(
+                    new ResponseObject("TRUE", __('message.login_success', ['Name' => $professor->name])),
+                    200);
+            default:
+                flash()->success(__('message.login_success', ['Name' => $professor->name]));
+                return redirect(route('tutor.index'));
+        }
     }
 
     // 03-02. 지도반 관리 기능
@@ -292,6 +292,29 @@ class TutorController extends Controller {
 
         return json_encode($studentsList);
     }
+
+    // 내 학생 상세정보 출력 - 성적 확인
+    public function detailsOfAttendance($argStdId, $argPeriod = 'weekly') {
+        // 01. 유효한 데이터 조회
+        $professor      = Professor::find(session()->get('user')['info']->id);
+        $studentInfo    = $professor->selectMyStudentInfo($argStdId);
+
+        // 출결 데이터 획득
+        //$attendanceRecord =
+
+
+        // 데이터 바인딩
+        $data = [
+            'title'                 => 'dummy title',
+            'student_info'          => $studentInfo,
+            'attendance_analyze'    => '',
+            'attendance_recently'   => ''
+        ];
+
+        return view('tutor_details_attendance', $data);
+    }
+
+
 
     // 03-03. 알림 설정
     // 알림 설정 페이지 출력

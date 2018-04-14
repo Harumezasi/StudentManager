@@ -43,7 +43,7 @@
                         <td>{{ $student->name }}</td>
                         <td>{{ $student->achievement }}%</td>
                         <td>
-                            <a href="{{-- route('') --}}" target="_blank">@lang('lecture.select')</a>
+                            <a href="{{ route('tutor.details.attendance', ['stdId' => $student->id]) }}" target="_blank">@lang('lecture.select')</a>
                             <a href="{{-- route('') --}}" target="_blank">@lang('interface.comment')</a>
                         </td>
                     </tr>

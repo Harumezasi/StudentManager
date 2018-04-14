@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Exceptions\NotAccessibleException;
 use App\Http\Controllers\ConstantEnum;
+use App\Http\Controllers\ResponseObject;
 use App\Http\DbInfoEnum;
 use App\Student;
 use App\Subject;
@@ -155,7 +156,7 @@ class StudentController extends Controller {
      * 반환값
      * @return \Illuminate\Contracts\View\Factory|\Illuminate\View\View
      */
-    public function login($argId, $argPw) {
+    public function login($argId, $argPw, $argDevice) {
         // 01. 입력된 아이디를 조회
         $student = Student::find($argId);
 
@@ -163,8 +164,16 @@ class StudentController extends Controller {
 
         // 등록되지 않은 학생
         if($student->password == "") {
-            flash()->warning(__('message.login_not_registered_std_id'))->important();
-            return back();
+            switch($argDevice) {
+                case 'android':
+                    return response()->json(
+                        new ResponseObject('FALSE', __('message.login_not_registered_std_id')),
+                        200
+                    );
+                default:
+                    flash()->warning(__('message.login_not_registered_std_id'))->important();
+                    return back();
+            }
 
         // 로그인 조건 만족
         } else if(password_verify($argPw, $student->password)) {
@@ -176,13 +185,29 @@ class StudentController extends Controller {
                 ]
             ]);
 
-            flash()->success(__('message.login_success', ['Name' => $student->name]));
-            return redirect(route('student.index'));
+            switch($argDevice) {
+                case 'android':
+                    return response()->json(
+                        new ResponseObject('TRUE', __('message.login_success', ['Name' => $student->name])),
+                        200
+                    );
+                default:
+                    flash()->success(__('message.login_success', ['Name' => $student->name]));
+                    return redirect(route('student.index'));
+            }
 
         // 잘못된 입력
         } else {
-            flash()->warning(__('message.login_wrong_id_or_password'))->important();
-            return back();
+            switch($argDevice) {
+                case 'android':
+                    return response()->json(
+                        new ResponseObject("TRUE", __('message.login_wrong_id_or_password')),
+                        200
+                    );
+                default:
+                    flash()->warning(__('message.login_wrong_id_or_password'))->important();
+                    return back();
+            }
         }
     }
 
@@ -299,8 +324,9 @@ class StudentController extends Controller {
     public function comeSchool() {
         $id = session()->get('user')['info']->id;
 
-        return json_encode(
-            app('App\Http\Controllers\AttendanceController')->comeSchool($id)
+        return response()->json(
+            app('App\Http\Controllers\AttendanceController')->comeSchool($id),
+            200
         );
     }
 
@@ -312,8 +338,9 @@ class StudentController extends Controller {
 
         $reqData    = json_decode($request->post('stdId'));
 
-        return json_encode(
-            app('App\Http\Controllers\AttendanceController')->comeSchool($reqData)
+        return response()->json(
+            app('App\Http\Controllers\AttendanceController')->comeSchool($reqData),
+            200
         );
     }
 
@@ -321,8 +348,9 @@ class StudentController extends Controller {
     public function leaveSchool() {
         $id = session()->get('user')['info']->id;
 
-        return json_encode(
-            app('App\Http\Controllers\AttendanceController')->leaveSchool($id)
+        return response()->json(
+            app('App\Http\Controllers\AttendanceController')->leaveSchool($id),
+            200
         );
     }
 
@@ -334,8 +362,9 @@ class StudentController extends Controller {
 
         $reqData    = json_decode($request->post('stdId'));
 
-        return json_encode(
-            app('App\Http\Controllers\AttendanceController')->leaveSchool($reqData)
+        return response()->json(
+            app('App\Http\Controllers\AttendanceController')->leaveSchool($reqData),
+            200
         );
     }
 

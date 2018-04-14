@@ -82,7 +82,7 @@ class Attendance extends Model {
 
     /**
      * 함수명:                         selectAttendanceRecords
-     * 함수 설명:                      하교 테이블과 출석 테이블의 연결 관계를 정의
+     * 함수 설명:                      출석 데이터 조회
      * 만든날:                         2018년 4월 3일
      *
      * 매개변수 목록
@@ -99,7 +99,7 @@ class Attendance extends Model {
 
     // 멤버 메서드
     // 고쳐야 됨
-    public function selectAttendanceRecords($argStdId, $startDate, $endDate) {
+    public static function selectAttendanceRecords($argStdId, $startDate, $endDate) {
         // 01. 지역 변수 선언
         $dbInfoSelf     = DbInfoEnum::ATTENDANCES;
         $dbInfoCome     = DbInfoEnum::COME_SCHOOLS;
@@ -126,8 +126,7 @@ class Attendance extends Model {
             )
             // join('leave_schools', 'attendances.leave_school', 'leave_schools.id')
             ->selectRaw("
-                (COUNT(CASE {$dbInfoSelf['t_name']}.{$dbInfoSelf['absence']} WHEN NOT NULL THEN FALSE ELSE TRUE END)
-                 - COUNT(CASE {$dbInfoCome['t_name']}.{$dbInfoCome['late']} WHEN TRUE THEN TRUE END)) AS '{$constList['ada']}', 
+                (COUNT('attendances.id') - COUNT(CASE come_schools.lateness_flag WHEN TRUE THEN TRUE END) - COUNT(CASE attendances.absence_flag WHEN TRUE THEN TRUE END)) AS '{$constList['ada']}', 
                 DATE_FORMAT(MAX(CASE WHEN {$dbInfoSelf['t_name']}.{$dbInfoSelf['absence']} IS NULL THEN {$dbInfoSelf['t_name']}.{$dbInfoSelf['reg_date']} END), '%Y-%m-%d') AS '{$constList['n_ada']}', 
                 COUNT(CASE {$dbInfoCome['t_name']}.{$dbInfoCome['late']} WHEN TRUE THEN TRUE END) AS '{$constList['late']}', 
                 DATE_FORMAT(MAX(CASE WHEN {$dbInfoCome['t_name']}.{$dbInfoCome['late']} IS TRUE THEN {$dbInfoSelf['t_name']}.{$dbInfoSelf['reg_date']} END), '%Y-%m-%d') AS '{$constList['n_late']}', 
