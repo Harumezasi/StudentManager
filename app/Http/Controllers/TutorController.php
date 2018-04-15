@@ -237,6 +237,113 @@ class TutorController extends Controller {
         }
     }
 
+    // 오늘자 등/하교 기록 조회
+    public function getAttendanceRecordsOfToday() {
+        // 01. 데이터 조회
+        $professor      = Professor::find(session()->get('user')['info']->id);
+        $attendanceData = $professor->selectMyStudentsAttendanceOfToday();      // 출석자 데이터
+        $lateData       = [];                                                   // 지각자 데이터
+        $absenceData    = [];                                                   // 결석자 데이터
+        $leaveData      = [];                                                   // 하교자 데이터
+        $careData       = [];                                                   // 관심대상 데이터
+        $alertData      = $professor->needCareAlerts()->get()->all();           // 분류 기준 데이터
+
+        // 02. 기준에 따른 학생 분류 => 관심학생
+        foreach($alertData as $alert) {
+            foreach($attendanceData as $key => $student) {
+                switch($alert->notification_flag) {
+                    case 0: /* 연속 지각 */
+                        // 조건 만족이 관심학생 리스트에 추가하고, 사유 입력
+                        // 원래 배열에선 삭제
+                        if ($student['consecutive_late'] >= $alert->needed_count) {
+                            $student['reason'] = "연속 지각 {$student['consecutive_late']}회";
+                            $careData[] = $student;
+                            unset($attendanceData[$key]);
+                        }
+                        break;
+                    case 1: /* 연속 조퇴 */
+                        // 조건 만족이 관심학생 리스트에 추가하고, 사유 입력
+                        // 원래 배열에선 삭제
+                        if ($student['consecutive_early'] >= $alert->needed_count) {
+                            $student['reason'] = "연속 조퇴 {$student['consecutive_early']}회";
+                            $careData[] = $student;
+                            unset($attendanceData[$key]);
+                        }
+                        break;
+                    case 2: /* 연속 결석 */
+                        // 조건 만족이 관심학생 리스트에 추가하고, 사유 입력
+                        // 원래 배열에선 삭제
+                        if ($student['consecutive_absence'] >= $alert->needed_count) {
+                            $student['reason'] = "연속 결석 {$student['consecutive_absence']}회";
+                            $careData[] = $student;
+                            unset($attendanceData[$key]);
+                        }
+                        break;
+                    case 3: /* 누적 지각 */
+                        // 조건 만족이 관심학생 리스트에 추가하고, 사유 입력
+                        // 원래 배열에선 삭제
+                        if ($student['total_late'] >= $alert->needed_count) {
+                            $student['reason'] = "누적 지각 {$student['total_late']}회";
+                            $careData[] = $student;
+                            unset($attendanceData[$key]);
+                        }
+                        break;
+                    case 4: /* 누적 조퇴 */
+                        // 조건 만족이 관심학생 리스트에 추가하고, 사유 입력
+                        // 원래 배열에선 삭제
+                        if ($student['total_early'] >= $alert->needed_count) {
+                            $student['reason'] = "누적 조퇴 {$student['total_early']}회";
+                            $careData[] = $student;
+                            unset($attendanceData[$key]);
+                        }
+                        break;
+                    case 5: /* 누적 결석 */
+                        // 조건 만족이 관심학생 리스트에 추가하고, 사유 입력
+                        // 원래 배열에선 삭제
+                        if ($student['total_absence'] >= $alert->needed_count) {
+                            $student['reason'] = "누적 결석 {$student['total_absence']}회";
+                            $careData[] = $student;
+                            unset($attendanceData[$key]);
+                        }
+                        break;
+                }
+            }
+        }
+
+        // 03. 기준에 따른 학생 분류 => 일반 학생
+        foreach($attendanceData as $key => $student) {
+            // 등교 시간이 없을 시 => 결석
+            if (is_null($student['come'])) {
+                $absenceData[] = $student;
+                unset($attendanceData[$key]);
+
+            // 지각 판별 플래그가 true 일 때 => 지각
+            } else if($student['late_flag']) {
+                $lateData[] = $student;
+                unset($attendanceData[$key]);
+
+            // 하교 시간이 있을 때 => 하교
+            } else if(!is_null($student['leave'])) {
+                $leaveData[] = $student;
+                unset($attendanceData[$key]);
+
+            }
+            // 아무것도 아니면 => 등교
+        }
+
+        // View 단에 반환할 데이터 설정
+        $data = [
+            'title'             => '지도교수: 오늘자 등하교',
+            'attendance_data'   => $attendanceData,
+            'late_data'         => $lateData,
+            'absence_data'      => $absenceData,
+            'leave_data'        => $leaveData,
+            'care_data'         => $careData
+        ];
+
+        return view('tutor_myclass_attendance', $data);
+    }
+
     /**
      * 함수명:                         manageMyClass
      * 함수 설명:                      사용자의 지도반 학생들 목록을 출력
@@ -300,7 +407,7 @@ class TutorController extends Controller {
         return response()->json($studentsList, 200);
     }
 
-    // 내 학생 상세정보 출력 - 성적 확인
+    // 내 학생 상세정보 출력 - 출결 확인
     public function detailsOfAttendance($argStdId, $argPeriod = 'weekly', $argDate = NULL) {
         // 01. 유효한 데이터 조회
         $professor      = Professor::find(session()->get('user')['info']->id);
@@ -379,7 +486,20 @@ class TutorController extends Controller {
         return view('tutor_details_attendance', $data);
     }
 
+    // 내 학생 상세정보 확인 - 성적
+    public function detailsOfScores($argStdId, $argLectureId = null) {
+        // 01. 유효한 데이터 조회
+        $professor      = Professor::find(session()->get('user')['info']->id);
+        $studentInfo    = $professor->selectMyStudentInfo($argStdId);
 
+        // View 단에 전송할 데이터
+        $data = [
+            'title'                 => "내 학생 확인: {$studentInfo['name']}",
+            'student_info'          => $studentInfo,
+        ];
+
+        return view('tutor_details_score', $data);
+    }
 
     // 03-03. 알림 설정
     // 알림 설정 페이지 출력
@@ -434,7 +554,6 @@ class TutorController extends Controller {
 
         $notification_flag = null;
         switch($continuity_flag) {
-            case true:
             case 'true':
                 switch($attendance_type) {
                     case 'late':
@@ -448,7 +567,6 @@ class TutorController extends Controller {
                         break;
                 }
                 break;
-            case false:
             case 'false':
                 switch($attendance_type) {
                     case 'late':
@@ -487,6 +605,7 @@ class TutorController extends Controller {
         } else {
             flash()->error('알림 추가에 실패하였습니다.');
         }
+
         return back();
     }
 

@@ -41,7 +41,7 @@
         <!-- 최하위 분류 : 각 기능의 세부 분류 2-->
         <tr>
             <!-- 내 지도반 관리 => 출결관리 -->
-            <td>@lang('myclass.check_attendance')</td><!-- 오늘 등하교 출결 보기 -->
+            <td><a href="{{ route('tutor.myclass.attendance') }}">@lang('myclass.check_attendance')</a></td><!-- 오늘 등하교 출결 보기 -->
             <td>@lang('myclass.today_positions')</td><!-- 일일 위치확인 -->
 
             <!-- 설정&관리 => 정보 등록 -->

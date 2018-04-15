@@ -11,7 +11,7 @@
     <!-- 상단 인터페이스 => 등/하교 출결, 분석  -->
     <div>
         <b>등/하교 출결</b>
-        <a href="">출결 분석</a>
+        <span>출결 분석</span>
     </div>
     <hr>
     <!-- 하단 인터페이스 => 출결 그래프, 상세 -->
@@ -24,17 +24,17 @@
                 <!-- 연 단위 조회 버튼 -->
                 <input type="button" value="연간"
                        onclick="location.assign('{{ route('tutor.details.attendance',
-                            ['stdId' => $student_info['id'], 'period' => 'yearly']) }}')">
+                            ['std_id' => $student_info['id'], 'period' => 'yearly']) }}')">
 
                 <!-- 월 단위 조회 버튼 -->
                 <input type="button" value="월간"
                        onclick="location.assign('{{ route('tutor.details.attendance',
-                            ['stdId' => $student_info['id'], 'period' => 'monthly']) }}')">
+                            ['std_id' => $student_info['id'], 'period' => 'monthly']) }}')">
 
                 <!-- 주 단위 조회 버튼 -->
                 <input type="button" value="주간"
                        onclick="location.assign('{{ route('tutor.details.attendance',
-                            ['stdId' => $student_info['id'], 'period' => 'weekly']) }}')">
+                            ['std_id' => $student_info['id'], 'period' => 'weekly']) }}')">
 
                 <!-- 이전일자 조회 버튼 -->
                 <input type="button" value="@lang('pagination.previous')"

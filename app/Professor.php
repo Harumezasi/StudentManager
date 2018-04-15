@@ -293,4 +293,45 @@ class Professor extends Model {
             ->select('id', 'name', 'face_photo')
             ->get()->all()[0];
     }
+
+    // 내 지도학생의 오늘 출석 기록 조회
+    public function selectMyStudentsAttendanceOfToday() {
+        // 01. 변수 설정
+        $dataArray = [];
+
+        $studentList = $this->group()->get()[0]->students()->get()->all();
+
+        // 학생별 데이터를 추출하여 배열에 추가
+        foreach($studentList as $student) {
+            $todayAttendance        = $student->selectAttendanceRecordOfToday()->get()[0]->toArray();
+            $consecutiveAttendance  = $student->selectConsecutiveAttendanceData();
+            $totalAttendance        = $student->selectRecentlyAttendanceRecords();
+
+            $temp = [
+                // 학생 정보
+                'id'                    => $todayAttendance['id'],
+                'name'                  => $todayAttendance['name'],
+
+                // 오늘자 등교 정보
+                'come'                  => $todayAttendance['come'],
+                'leave'                 => $todayAttendance['leave'],
+                'late_flag'             => $todayAttendance['lateness_flag'],
+                'absence_flag'          => $todayAttendance['absence_flag'],
+
+                // 연속 출석기록
+                'consecutive_late'      => $consecutiveAttendance['consecutive_late'],
+                'consecutive_absence'   => $consecutiveAttendance['consecutive_absence'],
+                'consecutive_early'     => $consecutiveAttendance['consecutive_early'],
+
+                // 누적 출석기록
+                'total_late'            => $totalAttendance['total_late'],
+                'total_absence'         => $totalAttendance['total_absence'],
+                'total_early'           => $totalAttendance['total_early']
+            ];
+
+            array_push($dataArray, $temp);
+        }
+
+        return $dataArray;
+    }
 }

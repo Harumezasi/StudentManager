@@ -22,9 +22,9 @@
             </div>
             <div>{{ $student_info['id'] }}</div>
             <div>{{ $student_info['name'] }}</div>
-            <div><a href="{{ route('tutor.details.attendance', $student_info['id']) }}">출결</a></div>
-            <div><a href="">성적</a></div>
-            <div><a href="">코멘트</a></div>
+            <div><a href="{{ route('tutor.details.attendance', ['std_id' => $student_info['id']]) }}">출결</a></div>
+            <div><a href="{{ route('tutor.details.scores', ['std_id' => $student_info['id']]) }}">성적</a></div>
+            <div><span>코멘트</span></div>
         </div>
         <div>
             @yield('details.section')

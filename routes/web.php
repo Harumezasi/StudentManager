@@ -173,6 +173,12 @@ Route::name('tutor.')->group(function() {
                 'uses'  => 'TutorController@manageMyClass'
             ]);
 
+            // 오늘자 등/하교 출력
+            Route::get('/myclass/attendance', [
+                'as'    => 'myclass.attendance',
+                'uses'  => 'TutorController@getAttendanceRecordsOfToday'
+            ]);
+
             // 안드로이드 - 내 지도반 학생 리스트 출력
             Route::get('/myclass/student_list', 'TutorController@getMyStudentsListAtAndroid');
 
@@ -180,6 +186,12 @@ Route::name('tutor.')->group(function() {
             Route::get('/details/attendance/{std_id}/{period?}/{date?}', [
                 'as'    => 'details.attendance',
                 'uses'  => 'TutorController@detailsOfAttendance'
+            ]);
+
+            // 학생 상세정보 => 성적 확인
+            Route::get('/details/scores/{std_id}/{lecture_id?}', [
+                'as'    => 'details.scores',
+                'uses'  => 'TutorController@detailsOfScores'
             ]);
 
             // 내 지도반 생성
