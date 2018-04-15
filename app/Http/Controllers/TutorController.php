@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Attendance;
+use App\Exceptions\NotAccessibleException;
 use App\NeedCareAlert;
 use App\Professor;
 use App\Group;
@@ -265,14 +267,19 @@ class TutorController extends Controller {
 
     // 모바일 => 내 학생 리스트 가져오기
     public function getMyStudentsListAtAndroid(Request $request) {
-        // 유효성 검증
-        $this->validate($request, [
-            'order_style'   => 'in:id,name'
-        ]);
-
         // 데이터 획득
         $profId = session()->get('user')['info']->id;
         $orderStyle = $request->exists('order_style') ? $request->get('order_style') : 'id';
+        switch(strtolower($orderStyle)) {
+            case 'id':
+            case 'name':
+                break;
+            default:
+                return response()->json(new ResponseObject(
+                        "FALSE", "잘못된 정렬 방식입니다."
+                    ), 200
+                );
+        }
 
         $queryList = Professor::find($profId)->selectStudentsOfMyClass($orderStyle);
 
@@ -290,25 +297,83 @@ class TutorController extends Controller {
             ];
         }
 
-        return json_encode($studentsList);
+        return response()->json($studentsList, 200);
     }
 
     // 내 학생 상세정보 출력 - 성적 확인
-    public function detailsOfAttendance($argStdId, $argPeriod = 'weekly') {
+    public function detailsOfAttendance($argStdId, $argPeriod = 'weekly', $argDate = NULL) {
         // 01. 유효한 데이터 조회
         $professor      = Professor::find(session()->get('user')['info']->id);
         $studentInfo    = $professor->selectMyStudentInfo($argStdId);
 
-        // 출결 데이터 획득
-        //$attendanceRecord =
+        // 02. 날짜 데이터 조회 & 출결 데이터 획득
+        $dateInfo   = [
+            'prev'  => null,
+            'this'  => null,
+            'next'  => null
+        ];
+        $startDate  = null;
+        $endDate    = null;
+        switch($argPeriod) {
+            // 설정 조회기간이 주간일 때
+            case 'weekly':
+                // 날짜 데이터 획득
+                $getDate = $this->getWeeklyValue($argDate);
 
+                $dateInfo['this'] = $getDate['this_week']->format('Y-m-').$getDate['this_week']->weekOfMonth;
+                $dateInfo['prev'] = $getDate['prev_week']->format('Y-m-').$getDate['prev_week']->weekOfMonth;
+                if(!is_null($getDate['next_week'])) {
+                    $dateInfo['next'] = $getDate['next_week']->format('Y-m-') . $getDate['next_week']->weekOfMonth;
+                }
+
+                $startDate  = $getDate['this_week']->copy()->startOfWeek()->format('Y-m-d');
+                $endDate    = $getDate['this_week']->copy()->endOfWeek()->format('Y-m-d');
+
+                break;
+            case 'monthly':
+                $getDate = $this->getMonthlyValue($argDate);
+
+                $dateInfo['this'] = $getDate['this_month']->format('Y-m');
+                $dateInfo['prev'] = $getDate['prev_month']->format('Y-m');
+                if(!is_null($getDate['next_month'])) {
+                    $dateInfo['next'] = $getDate['next_month']->format('Y-m');
+                }
+
+                $startDate  = $getDate['this_month']->copy()->startOfMonth()->format('Y-m-d');
+                $endDate    = $getDate['this_month']->copy()->endOfMonth()->format('Y-m-d');
+                break;
+            case 'yearly':
+                $getDate = $this->getYearValue($argDate);
+
+                $dateInfo['this'] = $getDate['this_year']->year;
+                $dateInfo['prev'] = $getDate['prev_year']->year;
+                if(!is_null($getDate['next_year'])) {
+                    $dateInfo['next'] = $getDate['next_year']->year;
+                }
+
+                $startDate  = $getDate['this_year']->copy()->startOfYear()->format('Y-m-d');
+                $endDate    = $getDate['this_year']->copy()->endOfYear()->format('Y-m-d');
+                break;
+            default:
+                throw new NotAccessibleException("잘못된 접근입니다.");
+                break;
+        }
+
+        // 출결 데이터 획득
+        $student = Student::find($studentInfo->id);
+        $recentlyAttendance = Attendance::selectAttendanceRecords($student->id, $startDate, $endDate);
+        $attendanceAnalyze  = $student->selectRecentlyAttendanceRecords();
+        $attendanceRecords  = $student->selectMyAbsenceRecords();
 
         // 데이터 바인딩
         $data = [
             'title'                 => "내 학생 확인: {$studentInfo['name']}",
+            'period'                => $argPeriod,
+            'date_info'             => $dateInfo,
             'student_info'          => $studentInfo,
-            'attendance_analyze'    => '',
-            'attendance_recently'   => ''
+            'recently_attendance'   => $recentlyAttendance,
+            'attendance_analyze'    => $attendanceAnalyze,
+            'attendance_records'    => $attendanceRecords
         ];
 
         return view('tutor_details_attendance', $data);

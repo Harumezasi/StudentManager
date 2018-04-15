@@ -177,7 +177,7 @@ Route::name('tutor.')->group(function() {
             Route::get('/myclass/student_list', 'TutorController@getMyStudentsListAtAndroid');
 
             // 학생 상세정보 => 출결 확인
-            Route::get('/details/attendance/{std_id}/{period?}', [
+            Route::get('/details/attendance/{std_id}/{period?}/{date?}', [
                 'as'    => 'details.attendance',
                 'uses'  => 'TutorController@detailsOfAttendance'
             ]);

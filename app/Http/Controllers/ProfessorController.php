@@ -374,6 +374,18 @@ class ProfessorController extends Controller {
         // 01. 입력된 아이디를 조회
         $professor = Professor::find($argId);
 
+        if(is_null($professor)) {
+            switch ($argDevice) {
+                case 'android':
+                    return response()->json(new ResponseObject(
+                        "FALSE", "존재하지 않는 아이디입니다."
+                    ), 200);
+                default:
+                    flash()->warning("존재하지 않는 아이디입니다.");
+                    return redirect(route('home.index'));
+            }
+        }
+
         // 02. 조회된 교수 계정의 유효성 검증
 
         // 로그인 조건 만족

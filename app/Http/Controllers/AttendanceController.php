@@ -122,9 +122,10 @@ class AttendanceController extends Controller {
                 $date['this_month']->copy()->endOfMonth()->format($formatDay));
         }
 
+        /*
         if(($result->{ConstantEnum::ATTENDANCE['ada']} + $result->{ConstantEnum::ATTENDANCE['absence']}) <= 0) {
             return NULL;
-        }
+        }*/
 
         // 출석율 계산
         $rate = ($result->{ConstantEnum::ATTENDANCE['ada']} /

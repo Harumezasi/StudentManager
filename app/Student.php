@@ -5,6 +5,7 @@ namespace App;
 use App\Http\Controllers\ConstantEnum;
 use Illuminate\Database\Eloquent\Model;
 use App\Http\DbInfoEnum;
+use Illuminate\Support\Facades\DB;
 
 /**
  * 클래스명:                       Student
@@ -281,7 +282,117 @@ class Student extends Model {
     }
 
     // 최근의 출석 데이터를 조회
-    public function selectRecentlyAttendanceRecords($startDate, $endDate) {
+    public function selectRecentlyAttendanceRecords()
+    {
+        // 출석 테이블 조인 결과
+        $joinResult = $this->attendances()
+            ->join('come_schools', 'attendances.come_school', 'come_schools.id')
+            ->leftJoin('leave_schools', 'attendances.leave_school', 'leave_schools.id');
 
+        // 데이터 조회 : 총 출석일, 총 지각횟수, 총 결석횟수, 총 조퇴횟수, 최근 등교&하교 시각,
+        //                  최근 지각 일자, 최근 결석일자, 최근 조퇴일자
+        $queryResult = $this->attendances()
+            ->join('come_schools', 'attendances.come_school', 'come_schools.id')
+            ->leftJoin('leave_schools', 'attendances.leave_school', 'leave_schools.id')
+            ->select(
+            // 총 출석 횟수
+            DB::raw("(COUNT('attendances.id') - 
+                        COUNT(CASE come_schools.lateness_flag WHEN TRUE THEN TRUE END) - 
+                        COUNT(CASE attendances.absence_flag WHEN TRUE THEN TRUE END)) AS 'total_ada'"),
+            // 총 지각 횟수
+            DB::raw("COUNT(CASE come_schools.lateness_flag WHEN TRUE THEN TRUE END) AS 'total_late'"),
+            // 총 결석 횟수
+            DB::raw("COUNT(CASE attendances.absence_flag WHEN TRUE THEN TRUE END) AS 'total_absence'"),
+            // 총 조퇴 횟수
+            DB::raw("COUNT(CASE leave_schools.early_flag WHEN TRUE THEN  TRUE END) AS 'total_early'"),
+
+            // 최근 등교
+            DB::raw("MAX(come_schools.reg_time) AS 'recent_come'"),
+            // 최근 결석
+            DB::raw("MAX(CASE attendances.absence_flag WHEN TRUE THEN attendances.reg_date END) AS 'recent_absence'"),
+            // 최근 조퇴
+            DB::raw("MAX(CASE leave_schools.early_flag WHEN TRUE THEN attendances.reg_date END) AS 'recent_early'"),
+
+            // 최근 하교
+            DB::raw("MAX(leave_schools.reg_time) AS 'recent_leave'"),
+            // 최근 지각
+            DB::raw("MAX(CASE come_schools.lateness_flag WHEN TRUE THEN come_schools.reg_time END) AS 'recent_late'")
+        )->get()->all()[0]->toArray();
+
+        // 데이터 조회 : 연속 지각횟수, 연속 결석횟수, 연속 조퇴횟수
+        // 실제 반영 데이터
+        $consecutiveLate = 0;
+        $consecutiveAbsence = 0;
+        $consecutiveEarly = 0;
+        // 계산용 임시 데이터
+        $tempLate = 0;
+        $tempAbsence = 0;
+        $tempEarly = 0;
+
+        // 쿼리 결과 => 행 추출
+        foreach ($joinResult->get()->toArray() as $row) {
+            // 행 => 각 셀의 데이터 추출
+            foreach ($row as $key => $data) {
+                switch ($key) {
+                    // 지각 횟수 계산
+                    case 'lateness_flag':
+                        if ($data == TRUE) {
+                            $tempLate++;
+                            if ($consecutiveLate < $tempLate) {
+                                $consecutiveLate = $tempLate;
+                            }
+                        } else {
+                            $tempLate = 0;
+                        }
+                        break;
+                    // 조퇴 횟수 계산
+                    case 'early_flag':
+                        if ($data == TRUE) {
+                            $tempEarly++;
+                            if ($consecutiveEarly < $tempEarly) {
+                                $consecutiveEarly = $tempEarly;
+                            }
+                        } else {
+                            $tempEarly = 0;
+                        }
+                        break;
+                    // 결석 횟수 계산
+                    case 'absence_flag':
+                        if ($data == TRUE) {
+                            $tempAbsence++;
+                            if ($consecutiveAbsence < $tempAbsence) {
+                                $consecutiveAbsence = $tempAbsence;
+                            }
+                        } else {
+                            $tempAbsence = 0;
+                        }
+                        break;
+                    default:
+                        continue;
+                }
+            }
+        }
+
+        // 데이터 결합
+        $consecutiveData = [
+            'consecutive_late' => $consecutiveLate,
+            'consecutive_absence' => $consecutiveAbsence,
+            'consecutive_early' => $consecutiveEarly
+        ];
+
+        return array_merge_recursive($queryResult, $consecutiveData);
+    }
+
+    // 모든 출석기록 조회 (페이지네이션)
+    public function selectMyAbsenceRecords() {
+        return $this->attendances()
+            ->join('come_schools', 'attendances.come_school', 'come_schools.id')
+            ->leftJoin('leave_schools', 'attendances.leave_school',  'leave_schools.id')
+            ->select(
+                'attendances.reg_date AS reg_date', 'come_schools.reg_time AS come',
+                'leave_schools.reg_time AS leave', 'come_schools.lateness_flag AS late',
+                'leave_schools.early_flag AS early', 'attendances.absence_flag AS absence'
+            )->orderBy('attendances.reg_date', 'desc')
+            ->paginate(10);
     }
 }

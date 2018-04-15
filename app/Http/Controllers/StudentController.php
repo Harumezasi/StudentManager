@@ -160,6 +160,16 @@ class StudentController extends Controller {
         // 01. 입력된 아이디를 조회
         $student = Student::find($argId);
 
+        if(is_null($student)) {
+            switch($argDevice) {
+                case 'android':
+                    return response()->json(new ResponseObject(
+                            "FALSE", "존재하지 않는 아이디입니다."
+                        ), 200
+                    );
+            }
+        }
+
         // 02. 조회된 학생 계정의 유효성 검증
 
         // 등록되지 않은 학생
@@ -201,7 +211,7 @@ class StudentController extends Controller {
             switch($argDevice) {
                 case 'android':
                     return response()->json(
-                        new ResponseObject("TRUE", __('message.login_wrong_id_or_password')),
+                        new ResponseObject("FALSE", __('message.login_wrong_id_or_password')),
                         200
                     );
                 default:
