@@ -245,8 +245,4 @@ class HomeController extends Controller {
 
         return redirect()->back();
     }
-
-    public function getCSRFToken() {
-        return csrf_token();
-    }
 }

@@ -305,7 +305,7 @@ class TutorController extends Controller {
 
         // 데이터 바인딩
         $data = [
-            'title'                 => 'dummy title',
+            'title'                 => "내 학생 확인: {$studentInfo['name']}",
             'student_info'          => $studentInfo,
             'attendance_analyze'    => '',
             'attendance_recently'   => ''

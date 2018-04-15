@@ -338,6 +338,14 @@ class ProfessorController extends Controller {
 
     }
 
+    // 성적 확인 메인페이지 출력
+    public function getScoresMain() {
+        // View 단에 전송할 데이터 할당
+        $data = [
+            'title'     => ''
+        ];
+    }
+
     // 03-01-03. 상담 관리
 
 
@@ -402,7 +410,7 @@ class ProfessorController extends Controller {
             switch($argDevice){
                 case 'android':
                     return response()->json(
-                        new ResponseObject("TRUE", __('message.login_wrong_id_or_password')),
+                        new ResponseObject("FALSE", __('message.login_wrong_id_or_password')),
                         200);
                 default:
                     flash()->warning(__('message.login_wrong_id_or_password'))->important();

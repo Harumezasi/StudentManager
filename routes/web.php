@@ -44,12 +44,6 @@ Route::name('home.')->group(function() {
         'as'   => 'forgot',
         'uses' => 'HomeController@forgot'
     ]);
-
-    // CSRF 토큰 요청
-    Route::post('/csrf', [
-        'as'    => 'csrf',
-        'uses'  => 'HomeController@getCSRFToken'
-    ]);
 });
 
 // 회원가입 유형 획득
