@@ -100,7 +100,7 @@
                     </v-card-title>
                     <v-flex d-flex xs12 sm6 md4>
                     <!-- form 양식 -->
-                    <v-form enctype='multipart/form-data' action='/professor/scores/store/excel/import' method='post'>
+                    <v-form action='/professor/scores/store/excel/import' method='post' enctype='multipart/form-data'>
                       <!-- <input type="hidden" name="_token" :value="csrf"> -->
                       <!-- 파일 등록 -->
                       <v-chip color="secondary" text-color="white">파일등록</v-chip>
