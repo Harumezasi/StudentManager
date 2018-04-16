@@ -388,7 +388,7 @@ class TutorController extends Controller {
     public function getMyStudentsListAtAndroid(Request $request) {
         // 데이터 획득
         $profId = session()->get('user')['info']->id;
-        $orderStyle = $request->exists('order_style') ? $request->get('order_style') : 'id';
+        $orderStyle = $request->exists('order_style') ? $request->post('order_style') : 'id';
         switch(strtolower($orderStyle)) {
             case 'id':
             case 'name':
@@ -480,7 +480,7 @@ class TutorController extends Controller {
 
         // 출결 데이터 획득
         $student = Student::find($studentInfo->id);
-        $recentlyAttendance = Attendance::selectAttendanceRecords($student->id, $startDate, $endDate);
+        $recentlyAttendance = Attendance::selectAttendanceRecords($student->id, $startDate, $endDate)->get()->all()[0];
         $attendanceAnalyze  = $student->selectRecentlyAttendanceRecords();
         $attendanceRecords  = $student->selectMyAbsenceRecords();
 

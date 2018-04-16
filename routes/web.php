@@ -71,16 +71,18 @@ Route::name('student.')->group(function() {
         ]);
 
         // 학생 출석 그래프 가져오기
-        Route::get('/attendance/graph', [
+        Route::post('/attendance/graph', [
             'as'    => 'attendance.graph',
             'uses'  => 'StudentController@getAttendanceGraph'
         ]);
 
+        // 하드웨어: 등교
         Route::post('/hardware/come_school', [
             'as'    => 'hardware.come_school',
             'uses'  => 'StudentController@comeSchoolHardWare'
         ]);
 
+        // 하드웨어: 하교
         Route::post('/hardware/leave_school', [
             'as'    => 'hardware.leave_school',
             'uses'  => 'StudentController@leaveSchoolHardWare'
@@ -107,14 +109,14 @@ Route::name('student.')->group(function() {
                 'uses'  => 'StudentController@getAttendanceRecords'
             ]);
 
-            // 등교 인증
-            Route::get('/come_school', [
+            // 모바일: 등교 인증
+            Route::post('/come_school', [
                 'as'    => 'come_school',
                 'uses'  => 'StudentController@comeSchool'
             ]);
 
-            // 하교 인증
-            Route::get('/leave_school', [
+            // 모바일: 하교 인증
+            Route::post('/leave_school', [
                 'as'    => 'leave_school',
                 'uses'  => 'StudentController@leaveSchool'
             ]);
@@ -179,8 +181,8 @@ Route::name('tutor.')->group(function() {
                 'uses'  => 'TutorController@getAttendanceRecordsOfToday'
             ]);
 
-            // 안드로이드 - 내 지도반 학생 리스트 출력
-            Route::get('/myclass/student_list', 'TutorController@getMyStudentsListAtAndroid');
+            // 모바일 - 내 지도반 학생 리스트 출력
+            Route::post('/myclass/student_list', 'TutorController@getMyStudentsListAtAndroid');
 
             // 학생 상세정보 => 출결 확인
             Route::get('/details/attendance/{std_id}/{period?}/{date?}', [
@@ -227,7 +229,7 @@ Route::name('tutor.')->group(function() {
                 'uses'  => 'TutorController@selectStudentsListAtExcel'
             ]);
 
-            // 조회한 학생 목록에서
+            // 조회한 학생 목록에서 엑셀 파일 저장
             Route::post('/config/store/student/excel/store', [
                 'as'    => 'config.store.student.excel.insert',
                 'uses'  => 'TutorController@insertStudentsList'
@@ -256,8 +258,8 @@ Route::name('professor.')->group(function() {
 
 
        // 학생 관리
-       // 프론트엔드 : 학생 리스트 조회
-       Route::get('/students_list', 'ProfessorController@getMyStudentsList');
+       // 모바일 : 학생 리스트 조회
+       Route::post('/students_list', 'ProfessorController@getMyStudentsList');
 
        // 교과목교수 로그인 이후 사용 가능 기능
        Route::middleware(['check.login'])->group(function() {

@@ -64,43 +64,13 @@ class AttendanceController extends Controller {
     public function getAttendanceRecords($argStdId, $argPeriod, $argDate) {
         // 01. 데이터 가져오기
         // 조회 날짜 획득
-        $date           = null;
-        $nowDate        = null;
-        $prevDate       = null;
-        $nextDate       = null;
-        $formatDay      = "Y-m-d";
-        $formatMonth    = "Y-m";
-        // 설정 조회기간에 따른 날짜 데이터 획득
-        if(is_null($argDate)) {
-            switch($argPeriod) {
-                case ConstantEnum::PERIOD['weekly']:
-                    $argDate = today()->format('Y-m-').today()->weekOfMonth;
-                    break;
-                case ConstantEnum::PERIOD['monthly']:
-                    $argDate = today()->format('Y-m');
-                    break;
-            }
-        }
-
-        if($argPeriod === ConstantEnum::PERIOD['weekly']) {
-            $date = $this->getWeeklyValue($argDate);
-        } else if($argPeriod === ConstantEnum::PERIOD['monthly']) {
-            $date = $this->getMonthlyValue($argDate);
-        }
-
-        // 각 기간에 대한 문자열 추출
-        switch ($argPeriod) {
-            // 주 단위
-            case ConstantEnum::PERIOD['weekly'];
-                $nowDate    = $date['this_week']->copy()->format($formatMonth).'-'.$date['this_week']->copy()->weekOfMonth;
-                $prevDate   = $date['prev_week']->copy()->format($formatMonth).'-'.$date['prev_week']->copy()->weekOfMonth;
-                $nextDate   = is_null($date['next_week']) ? NULL : $date['next_week']->copy()->format($formatMonth).'-'.$date['next_week']->copy()->weekOfMonth;
+        $date = null;
+        switch($argPeriod) {
+            case 'weekly':
+                $date = $this->getWeeklyValue($argDate)['this_week'];
                 break;
-            // 월 단위
-            case ConstantEnum::PERIOD['monthly'];
-                $nowDate    = $date['this_month']->copy()->format($formatMonth);
-                $prevDate   = $date['prev_month']->copy()->format($formatMonth);
-                $nextDate   = is_null($date['next_month']) ? NULL : $date['next_month']->copy()->format($formatMonth);
+            case 'monthly':
+                $date = $this->getMonthlyValue($argDate)['this_month'];
                 break;
         }
 
@@ -108,36 +78,29 @@ class AttendanceController extends Controller {
         $std_id = $argStdId;
 
         // DB 조회
-        $db = new Attendance();
         $result = NULL;
         if ($argPeriod === ConstantEnum::PERIOD['weekly']) {
             // 조회단위가 주인 경우 -> 이번주의 출석 기록을 조회
-            $result = $db->selectAttendanceRecords($std_id,
-                $date['this_week']->copy()->startOfWeek()->format($formatDay),
-                $date['this_week']->copy()->endOfWeek()->format($formatDay));
+            $result = Attendance::selectAttendanceRecords($std_id,
+                $date->copy()->startOfWeek()->format('Y-m-d'),
+                $date->copy()->endOfWeek()->format('Y-m-d'))
+                ->get()->all()[0];
         } else if ($argPeriod === ConstantEnum::PERIOD['monthly']) {
             // 조회단위가 달인 경우 -> 이번달의 출석기록을 조회
-            $result = $db->selectAttendanceRecords($std_id,
-                $date['this_month']->copy()->startOfMonth()->format($formatDay),
-                $date['this_month']->copy()->endOfMonth()->format($formatDay));
+            $result = Attendance::selectAttendanceRecords($std_id,
+                $date->copy()->startOfMonth()->format('Y-m-d'),
+                $date->copy()->endOfMonth()->format('Y-m-d'))
+                ->get()->all()[0];
         }
 
-        /*
-        if(($result->{ConstantEnum::ATTENDANCE['ada']} + $result->{ConstantEnum::ATTENDANCE['absence']}) <= 0) {
-            return NULL;
-        }*/
-
         // 출석율 계산
-        $rate = ($result->{ConstantEnum::ATTENDANCE['ada']} /
-                ($result->{ConstantEnum::ATTENDANCE['ada']} + $result->{ConstantEnum::ATTENDANCE['absence']})) * 100;
 
-        return [
-            'query_result'  => $result,
-            'now_date'      => $nowDate,
-            'prev_date'     => $prevDate,
-            'next_date'     => $nextDate,
-            'rate'          => $rate
-        ];
+        if(($total_ada = $result->{ConstantEnum::ATTENDANCE['ada']} + $result->{ConstantEnum::ATTENDANCE['absence']}) > 0) {
+            $rate = ($result->{ConstantEnum::ATTENDANCE['ada']} / $total_ada) * 100;
+            $result['rate'] = number_format($rate, 2);
+        }
+
+        return $result;
     }
 
     // 학생 등교

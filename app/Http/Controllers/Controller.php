@@ -49,9 +49,10 @@ class Controller extends BaseController {
 
             // 이번주
             $thisWeek = Carbon::createFromDate($data[0], $data[1], 1);
-            while($thisWeek->weekOfMonth != $data[2]) {
+            while($thisWeek->weekOfMonth <= $data[2]) {
                 $thisWeek->addWeek();
             }
+            $thisWeek->startOfWeek();
         } else {
             throw new ErrorException('aaa');
         }

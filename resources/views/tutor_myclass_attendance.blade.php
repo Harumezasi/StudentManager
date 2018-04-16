@@ -11,6 +11,21 @@
     <style type="text/css">
         div .student_element {
             border: 1px solid black;
+            width:  200px;
+            font-weight: bold;
+        }
+
+        div .late {
+            background-color: yellow;
+        }
+
+        div .absence {
+            background-color: darkred;
+            color:            white;
+        }
+
+        div .good {
+            background-color: royalblue;
         }
     </style>
 @endsection
@@ -36,8 +51,11 @@
                     <!-- 등교 학생 -->
                     <td>
                         @forelse($attendance_data as $student)
-                            <div>
-                                {{ "학번:{$student['id']}, 이름: {$student['name']}, 등교시각: {$student['come']}" }}
+                            <div class="student_element good"
+                                 onclick="location.assign('{{ route('tutor.details.attendance', ['std_id' => $student['id']]) }}')">
+                                <div>학번:{{$student['id']}}</div>
+                                <div>이름: {{$student['name']}}</div>
+                                <div>등교시각: {{$student['come']}}</div>
                             </div>
                         @empty
                             조회된 데이터가 없습니다.
@@ -46,10 +64,13 @@
                     <!-- 하교 학생 -->
                     <td>
                         @forelse($leave_data as $student)
-                            <div
-                                @if($student['leave'])
-                                @endif>
-                                {{ "학번:{$student['id']}, 이름: {$student['name']}, 하교시각: {$student['leave']}" }}
+                            <div class="student_element
+                                @if($student['late_flag'])
+                                    late
+                                @endif" onclick="location.assign('{{ route('tutor.details.attendance', ['std_id' => $student['id']]) }}')">
+                                <div>학번:{{$student['id']}}</div>
+                                <div>이름: {{$student['name']}}</div>
+                                <div>하교시각: {{$student['leave']}}</div>
                             </div>
                         @empty
                             조회된 데이터가 없습니다.
@@ -58,8 +79,10 @@
                     <!-- 결석 학생 -->
                     <td>
                         @forelse($absence_data as $student)
-                            <div>
-                                {{ "학번:{$student['id']}, 이름: {$student['name']}" }}
+                            <div class="student_element absence"
+                                    onclick="location.assign('{{ route('tutor.details.attendance', ['std_id' => $student['id']]) }}')">
+                                <div>학번:{{$student['id']}}</div>
+                                <div>이름: {{$student['name']}}</div>
                             </div>
                         @empty
                             조회된 데이터가 없습니다.
@@ -68,7 +91,12 @@
                     <!-- 지각 학생 -->
                     <td>
                         @forelse($late_data as $student)
-                            <div border="1">{{ "학번:{$student['id']}, 이름: {$student['name']}, 등교시각: {$student['come']}" }}</div>
+                            <div class="student_element late"
+                                 onclick="location.assign('{{ route('tutor.details.attendance', ['std_id' => $student['id']]) }}')">
+                                <div>학번:{{$student['id']}}</div>
+                                <div>이름: {{$student['name']}}</div>
+                                <div>등교시각: {{$student['come']}}</div>
+                            </div>
                         @empty
                             조회된 데이터가 없습니다.
                         @endforelse
@@ -76,7 +104,18 @@
                     <!-- 관심학생 -->
                     <td>
                         @forelse($care_data as $student)
-                            <div border="1">{{ "학번:{$student['id']}, 이름: {$student['name']}, 사유: {$student['reason']}" }}</div>
+                            <div class="student_element
+                                @if($student['late_flag'])
+                                    late
+                                @elseif($student['absence_flag'])
+                                    absence
+                                @endif
+                                 " onclick="location.assign('{{ route('tutor.details.attendance', ['std_id' => $student['id']]) }}')">
+                                <div>학번:{{$student['id']}}</div>
+                                <div>이름: {{$student['name']}}</div>
+                                <div>등교시각: {{ $student['come'] }}</div>
+                                <div>사유: {{$student['reason']}}</div>
+                            </div>
                         @empty
                             조회된 데이터가 없습니다.
                         @endforelse

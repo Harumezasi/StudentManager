@@ -249,12 +249,13 @@ class ProfessorController extends Controller {
         return view('professor_check_attendance', $data);
     }
 
+    // 모바일 :: 학생 리스트 출력
     public function getMyStudentsList(Request $request) {
         $this->validate($request, [
             'id'    => 'required|exists:professors,id'
         ]);
 
-        $professor = Professor::find($request->get('id'));
+        $professor = Professor::find($request->post('id'));
         $studentsList = $professor->getStudentsListOfMyLecture();
 
         return response()->json($studentsList, 200);

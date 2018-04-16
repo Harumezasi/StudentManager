@@ -265,47 +265,48 @@ class StudentController extends Controller {
      * 예외
      * @throws                          NotAccessibleException
      */
-    public function getAttendanceRecords($argPeriod = ConstantEnum::PERIOD['weekly'], $argDate = null) {
+    public function getAttendanceRecords($argPeriod = 'weekly', $argDate = null) {
         // 01. 데이터 획득
         $std_id = session()->get('user')['info']->id;
         $attendanceData =
             app('App\Http\Controllers\AttendanceController')->getAttendanceRecords($std_id, $argPeriod, $argDate);
 
         // 해당 기간동안 출석 데이터가 없을 경우
-        $periodData = null;
+        $periodData = [];
         switch($argPeriod) {
-            case ConstantEnum::PERIOD['weekly']:
-                $periodData = today()->format('Y-m-').today()->weekOfMonth;
+            case 'weekly':
+                $period = $this->getWeeklyValue($argDate);
+                $periodData = [
+                    'this'      => $period['this_week']->format('Y-m-').$period['this_week']->weekOfMonth,
+                    'prev'      => $period['prev_week']->format('Y-m-').$period['prev_week']->weekOfMonth,
+                    'next'      => !is_null($period['next_week']) ?
+                            $period['next_week']->format('Y-m-').$period['next_week']->weekOfMonth : null
+                ];
                 break;
-            case ConstantEnum::PERIOD['monthly']:
-                $periodData = today()->format('Y-m');
+            case 'monthly':
+                $period = $this->getMonthlyValue($argDate);
+                $periodData = [
+                    'this'      => $period['this_month']->format('Y-m'),
+                    'prev'      => $period['prev_month']->format('Y-m'),
+                    'next'      => !is_null($period['next_month']) ?
+                        $period['next_month']->format('Y-m') : null
+                ];
                 break;
         }
-        if(is_null($attendanceData) && (!is_null($argDate) || $argDate =! $periodData)) {
-            throw new NotAccessibleException(__('exception.ada_records_not_exists'));
-        }
+
+
 
         // 02. 매개 데이터 삽입
         $data = [
             'title'                 => __('page_title.student_attendance'),
             'period'                => $argPeriod,
 
-            'date'                  => $attendanceData['now_date'],
-            'prev_date'             => $attendanceData['prev_date'],
-            'next_date'             => $attendanceData['next_date'],
+            'date'                  => $periodData['this'],
+            'prev_date'             => $periodData['prev'],
+            'next_date'             => $periodData['next'],
 
-            'attendance_rate'       => number_format($attendanceData['rate'], 2),
-            'attendance'            => $attendanceData['query_result']->{ConstantEnum::ATTENDANCE['ada']},
-            'nearest_attendance'    => $attendanceData['query_result']->{ConstantEnum::ATTENDANCE['n_ada']},
-
-            'late'                  => $attendanceData['query_result']->{ConstantEnum::ATTENDANCE['late']},
-            'nearest_late'          => $attendanceData['query_result']->{ConstantEnum::ATTENDANCE['n_late']},
-
-            'absence'               => $attendanceData['query_result']->{ConstantEnum::ATTENDANCE['absence']},
-            'nearest_absence'       => $attendanceData['query_result']->{ConstantEnum::ATTENDANCE['n_absence']},
-
-            'early'                 => $attendanceData['query_result']->{ConstantEnum::ATTENDANCE['early']},
-            'nearest_early'         => $attendanceData['query_result']->{ConstantEnum::ATTENDANCE['n_early']},
+            // 출석 데이터가 있으면 => 데이터 반환, 없으면 NULL 반환
+            'attendance_data'       => $attendanceData
         ];
 
         return view('student_attendance', $data);
@@ -313,7 +314,7 @@ class StudentController extends Controller {
 
     // 모바일 : 출석율 그래프 그리기
     public function getAttendanceGraph(Request $request) {
-        $stdId = $request->get('id');
+        $stdId = $request->post('id');
         $period = 'weekly';
         $date = null;
 
