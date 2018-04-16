@@ -6,8 +6,8 @@ use App\Exceptions\NotAccessibleException;
 use App\Http\DbInfoEnum;
 use App\Professor;
 use App\Student;
-use App\Http\Controllers\TutorController;
 use App\Http\Controllers\ConstantEnum;
+use Validator;
 use Illuminate\Http\Request;
 
 /**
@@ -251,9 +251,22 @@ class ProfessorController extends Controller {
 
     // 모바일 :: 학생 리스트 출력
     public function getMyStudentsList(Request $request) {
+        /*
         $this->validate($request, [
             'id'    => 'required|exists:professors,id'
+        ]);*/
+
+        // 유효성 검사
+        $validator = Validator::make($request->all(), [
+            'id'    => 'required|exists:professors,id'
         ]);
+
+        if($validator->fails()) {
+            return response()->json(new ResponseObject(
+                false, "존재하지 않는 ID입니다."
+            ), 200);
+        }
+
 
         $professor = Professor::find($request->post('id'));
         $studentsList = $professor->getStudentsListOfMyLecture();
