@@ -49,11 +49,13 @@ class ProfessorController extends Controller {
      * @return                         \Illuminate\Contracts\View\Factory|\Illuminate\View\View
      */
     public function index() {
+        /*
         $data = [
             'title'     => __('page_title.professor_index')
         ];
 
-        return view('professor_main', $data);
+        return view('professor_main', $data);*/
+        return view('welcome');
     }
 
     /**
@@ -241,12 +243,14 @@ class ProfessorController extends Controller {
         $professor      = Professor::find(session()->get('user')['info']->id);
         $studentsList   = $professor->getStudentsListOfMyLecture();
 
+        return $studentsList;
+        /*
         $data = [
             'title'         => __('page_title.professor_check_attendance'),
             'studentList'   => $studentsList,
         ];
 
-        return view('professor_check_attendance', $data);
+        return view('professor_check_attendance', $data);*/
     }
 
     // 모바일 :: 학생 리스트 출력

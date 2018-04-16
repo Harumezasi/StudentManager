@@ -94,10 +94,11 @@ class AttendanceController extends Controller {
         }
 
         // 출석율 계산
-
         if(($total_ada = $result->{ConstantEnum::ATTENDANCE['ada']} + $result->{ConstantEnum::ATTENDANCE['absence']}) > 0) {
             $rate = ($result->{ConstantEnum::ATTENDANCE['ada']} / $total_ada) * 100;
             $result['rate'] = number_format($rate, 2);
+        } else {
+            $result['rate'] = 0;
         }
 
         return $result;
@@ -116,7 +117,7 @@ class AttendanceController extends Controller {
             // 등교 일자가 오늘이라면 => 함수 종료
             if ($recent_attd->reg_date == today()->format('Y-m-d')) {
                 return new ResponseObject(
-                    "false",
+                    false,
                     "오늘 등교하셨습니다."
                 );
             }
@@ -127,7 +128,7 @@ class AttendanceController extends Controller {
                 if (is_null($recent_attd->leave_school)) {
                     // => 지난 번에 등교하고 하교를 하지 않음 => 하교 하라는 메시지 출력
                     return new ResponseObject(
-                        'false',
+                        false,
                         '하교를 하지 않으셨습니다. 하교를 먼저 해주세요.'
                     );
                 }
@@ -137,14 +138,14 @@ class AttendanceController extends Controller {
         // 출석 데이터 생성
         if (Attendance::insertAttendance($student->id) === false) {
             return new ResponseObject(
-                'false',
+                false,
                 '데이터 생성 실패'
             );
         }
 
         // 출석이 끝나면 => 성공 메시지 반환
         return new ResponseObject(
-            'true',
+            true,
             __('message.login_success', ['name' => $student->name])
         );
     }
@@ -163,7 +164,7 @@ class AttendanceController extends Controller {
         if(!is_null($recent_attd->leave_school) ||
             (is_null($recent_attd->come_school) && is_null($recent_attd->leave_school))) {
             return new ResponseObject(
-                "false",
+                false,
                 "최근 등교기록이 없습니다. 등교를 우선 해주세요."
             );
         }
@@ -171,14 +172,14 @@ class AttendanceController extends Controller {
         // 출석 데이터 생성
         if(Attendance::updateAttendanceAtLeaveSchool($student->id) === false) {
             return new ResponseObject(
-                'false',
+                false,
                 '데이터 생성 실패'
             );
         }
 
         // 출석이 끝나면 => 성공 메시지 반환
         return new ResponseObject(
-            'true',
+            true,
             '고생하셨습니다.'
         );
     }

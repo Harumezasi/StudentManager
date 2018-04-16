@@ -424,8 +424,7 @@ class Student extends Model {
                 'attendances.reg_date AS reg_date', 'come_schools.reg_time AS come',
                 'leave_schools.reg_time AS leave', 'come_schools.lateness_flag AS late',
                 'leave_schools.early_flag AS early', 'attendances.absence_flag AS absence'
-            )->orderBy('attendances.reg_date', 'desc')
-            ->paginate(10);
+            )->orderBy('attendances.reg_date', 'desc');
     }
 
     // 자신의 오늘 출석 기록을 조회

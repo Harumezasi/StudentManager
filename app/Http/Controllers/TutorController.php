@@ -59,12 +59,14 @@ class TutorController extends Controller {
             return redirect(route('tutor.myclass.create'));
         }
 
+        /*
         // 지도반이 있으면 타이틀을 설정하고 메인 페이지로 이동
         $data = [
             'title'     => __('page_title.tutor_index')
         ];
 
-        return view('tutor_main', $data);
+        return view('tutor_main', $data);*/
+        return view('welcome');
     }
 
     // 03-01. 회원관리 기능
@@ -345,7 +347,7 @@ class TutorController extends Controller {
 
         // View 단에 반환할 데이터 설정
         $data = [
-            'title'             => '지도교수: 오늘자 등하교',
+            //'title'             => '지도교수: 오늘자 등하교',
             'attendance_data'   => $attendanceData,
             'late_data'         => $lateData,
             'absence_data'      => $absenceData,
@@ -353,7 +355,8 @@ class TutorController extends Controller {
             'care_data'         => $careData
         ];
 
-        return view('tutor_myclass_attendance', $data);
+        /*return view('tutor_myclass_attendance', $data);*/
+        return $data;
     }
 
     /**
@@ -374,7 +377,7 @@ class TutorController extends Controller {
         // 01. 변수 설정
         $professor = Professor::find(session()->get('user')['info']->id);
         $studentList = $professor->selectStudentsOfMyClass($argOrder);
-
+        /*
         $data = [
             'title'         => __('page_title.tutor_myclass_manage'),
             'order'         => $argOrder,
@@ -382,6 +385,8 @@ class TutorController extends Controller {
         ];
 
         return view('tutor_myclass_manage', $data);
+        */
+        return $studentList->get()->all();
     }
 
     // 모바일 => 내 학생 리스트 가져오기
@@ -482,7 +487,7 @@ class TutorController extends Controller {
         $student = Student::find($studentInfo->id);
         $recentlyAttendance = Attendance::selectAttendanceRecords($student->id, $startDate, $endDate)->get()->all()[0];
         $attendanceAnalyze  = $student->selectRecentlyAttendanceRecords();
-        $attendanceRecords  = $student->selectMyAbsenceRecords();
+        $attendanceRecords  = $student->selectMyAbsenceRecords()->paginate(10);
 
         // 데이터 바인딩
         $data = [

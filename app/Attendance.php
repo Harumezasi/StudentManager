@@ -109,7 +109,7 @@ class Attendance extends Model {
         return Attendance::where([
             ['std_id', $argStdId], ['reg_date', '>=', "{$startDate}"], ['reg_date', '<=', "{$endDate}"]
             ])->join('come_schools', 'attendances.come_school', 'come_schools.id')
-            ->join('leave_schools', 'attendances.leave_school', 'leave_schools.id')
+            ->leftJoin('leave_schools', 'attendances.leave_school', 'leave_schools.id')
             ->selectRaw("
                 (COUNT('attendances.id') - COUNT(CASE come_schools.lateness_flag WHEN TRUE THEN TRUE END) - COUNT(CASE attendances.absence_flag WHEN TRUE THEN TRUE END)) AS '{$constList['ada']}', 
                 DATE_FORMAT(MAX(CASE WHEN {$dbInfoSelf['t_name']}.{$dbInfoSelf['absence']} IS NULL THEN {$dbInfoSelf['t_name']}.{$dbInfoSelf['reg_date']} END), '%Y-%m-%d') AS '{$constList['n_ada']}', 

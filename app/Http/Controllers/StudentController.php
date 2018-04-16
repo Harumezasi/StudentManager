@@ -12,6 +12,7 @@ use App\Score;
 use App\Lecture;
 use Illuminate\Http\Request;
 use Psy\Exception\ErrorException;
+use Validator;
 
 /**
  * 클래스명:                       StudentController
@@ -52,11 +53,13 @@ class StudentController extends Controller {
      * @return                         \Illuminate\Contracts\View\Factory|\Illuminate\View\View
      */
     public function index() {
+        /*
         $data = [
             'title'     => __('page_title.student_index')
         ];
 
-        return view('student_main', $data);
+        return view('student_main', $data);*/
+        return view('welcome');
     }
 
     // 03-01. 계정 관리
@@ -251,7 +254,7 @@ class StudentController extends Controller {
      * 만든날:                         2018년 4월 01일
      *
      * 매개변수 목록
-     * @param $argPeriod :             조회기간 설정
+     * @param string $argPeriod :             조회기간 설정
      * @param $argDate :               조회일자
      *
      * 지역변수 목록
@@ -260,10 +263,9 @@ class StudentController extends Controller {
      * $data(array):                   View 단에 바인딩할 데이터
      *
      * 반환값
-     * @return \Illuminate\Contracts\View\Factory|\Illuminate\View\View 예외
+     * @return                         array
      *
      * 예외
-     * @throws                          NotAccessibleException
      */
     public function getAttendanceRecords($argPeriod = 'weekly', $argDate = null) {
         // 01. 데이터 획득
@@ -294,11 +296,9 @@ class StudentController extends Controller {
                 break;
         }
 
-
-
         // 02. 매개 데이터 삽입
         $data = [
-            'title'                 => __('page_title.student_attendance'),
+            //'title'                 => __('page_title.student_attendance'),
             'period'                => $argPeriod,
 
             'date'                  => $periodData['this'],
@@ -306,10 +306,103 @@ class StudentController extends Controller {
             'next_date'             => $periodData['next'],
 
             // 출석 데이터가 있으면 => 데이터 반환, 없으면 NULL 반환
-            'attendance_data'       => $attendanceData
+            //'attendance_data'       => $attendanceData,
+
+            'attendance_rate'       => $attendanceData['rate'],
+            'attendance'            => $attendanceData['attendance'],
+            'nearest_attendance'    => $attendanceData['nearest_attendance'],
+
+            'late'                  => $attendanceData['late'],
+            'nearest_late'          => $attendanceData['nearest_late'],
+
+            'absence'               => $attendanceData['absence'],
+            'nearest_absence'       => $attendanceData['nearest_absence'],
+
+            'early'                 => $attendanceData['early'],
+            'nearest_early'         => $attendanceData['nearest_early'],
         ];
 
-        return view('student_attendance', $data);
+        //return view('student_attendance', $data);
+        return $data;
+    }
+
+    // 모바일: 출결 기록 조회
+    public function getAttendanceRecordsAtMobile(Request $request) {
+        // 데이터 검증
+        $validator = Validator::make($request->all(), [
+            'stdId'         => 'required',
+            'period'        => 'required|in:weekly,monthly',
+            'date'          => 'required'
+        ]);
+
+        if($validator->fails()) {
+            return response()->json(new ResponseObject(
+                false, "데이터 수신에 실패헸습니다."
+            ), 200);
+        }
+
+        // 01. 데이터 획득
+        $std_id     = $request->post('stdId');
+        $reqPeriod  = $request->post('period');
+        $reqDate    = $request->post('date');
+
+
+        $attendanceData =
+            app('App\Http\Controllers\AttendanceController')->getAttendanceRecords($std_id, $reqPeriod, $reqDate);
+
+
+
+        // 해당 기간동안 출석 데이터가 없을 경우
+        $periodData = [];
+        switch($reqPeriod) {
+            case 'weekly':
+                $period = $this->getWeeklyValue($reqDate);
+                $periodData = [
+                    'this'      => $period['this_week']->format('Y-m-').$period['this_week']->weekOfMonth,
+                    'prev'      => $period['prev_week']->format('Y-m-').$period['prev_week']->weekOfMonth,
+                    'next'      => !is_null($period['next_week']) ?
+                        $period['next_week']->format('Y-m-').$period['next_week']->weekOfMonth : null
+                ];
+                break;
+            case 'monthly':
+                $period = $this->getMonthlyValue($reqDate);
+                $periodData = [
+                    'this'      => $period['this_month']->format('Y-m'),
+                    'prev'      => $period['prev_month']->format('Y-m'),
+                    'next'      => !is_null($period['next_month']) ?
+                        $period['next_month']->format('Y-m') : null
+                ];
+                break;
+        }
+
+        // 02. 매개 데이터 삽입
+        $data = [
+            //'title'                 => __('page_title.student_attendance'),
+            //'period'                => $reqPeriod,
+
+            'date'                  => $periodData['this'],
+            'prev_date'             => $periodData['prev'],
+            'next_date'             => $periodData['next'],
+
+            // 출석 데이터가 있으면 => 데이터 반환, 없으면 NULL 반환
+            //'attendance_data'       => $attendanceData,
+
+            //'attendance_rate'       => $attendanceData['rate'],
+            'attendance'            => $attendanceData['attendance'],
+            'nearest_attendance'    => $attendanceData['nearest_attendance'],
+
+            'late'                  => $attendanceData['late'],
+            'nearest_late'          => $attendanceData['nearest_late'],
+
+            'absence'               => $attendanceData['absence'],
+            'nearest_absence'       => $attendanceData['nearest_absence'],
+
+            'early'                 => $attendanceData['early'],
+            'nearest_early'         => $attendanceData['nearest_early'],
+        ];
+
+        //return view('student_attendance', $data);
+        return response()->json($data, 200);
     }
 
     // 모바일 : 출석율 그래프 그리기
@@ -330,7 +423,7 @@ class StudentController extends Controller {
 
         return view('student_attendance_graph', $data);
     }
-
+/*
     // 모바일 : 출석체크
     public function comeSchool() {
         $id = session()->get('user')['info']->id;
@@ -340,12 +433,24 @@ class StudentController extends Controller {
             200
         );
     }
-
+*/
     // 하드웨어: 출석체크
-    public function comeSchoolHardWare(Request $request) {
+    public function comeSchool(Request $request) {
+        /*
         $this->validate($request, [
             'stdId'    => 'required|JSON'
+        ]);*/
+
+        // 유효성 검사
+        $validator = Validator::make($request->all(), [
+            'stdId'    => 'required|JSON'
         ]);
+
+        if($validator->fails()) {
+            return response()->json(new ResponseObject(
+                false, "데이터 수신에 실패헸습니다."
+            ), 200);
+        }
 
         $reqData    = json_decode($request->post('stdId'));
 
@@ -354,7 +459,7 @@ class StudentController extends Controller {
             200
         );
     }
-
+/*
     // 모바일 : 하교하기
     public function leaveSchool() {
         $id = session()->get('user')['info']->id;
@@ -364,12 +469,24 @@ class StudentController extends Controller {
             200
         );
     }
-
+*/
     // 하드웨어: 하교하기
-    public function leaveSchoolHardWare(Request $request) {
+    public function leaveSchool(Request $request) {
+        /*
         $this->validate($request, [
             'stdId'    => 'required|JSON'
+        ]);*/
+
+        // 유효성 검사
+        $validator = Validator::make($request->all(), [
+            'stdId'    => 'required|JSON'
         ]);
+
+        if($validator->fails()) {
+            return response()->json(new ResponseObject(
+                false, "데이터 수신에 실패헸습니다."
+            ), 200);
+        }
 
         $reqData    = json_decode($request->post('stdId'));
 

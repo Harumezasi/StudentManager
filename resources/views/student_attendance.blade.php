@@ -37,7 +37,7 @@
         <!-- 출석률 표시 -->
         <div>
             <span>@lang('attendance.attendance_rate')</span>
-           {{-- <span>{{ $attendance_rate }}%</span>--}}
+            <span>{{ $attendance_data['rate'] }}%</span>
         </div>
 
         <!-- 간략한 출석 기록 표시 -->

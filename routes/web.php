@@ -79,20 +79,23 @@ Route::name('student.')->group(function() {
         // 하드웨어: 등교
         Route::post('/hardware/come_school', [
             'as'    => 'hardware.come_school',
-            'uses'  => 'StudentController@comeSchoolHardWare'
+            'uses'  => 'StudentController@comeSchool'
         ]);
 
         // 하드웨어: 하교
         Route::post('/hardware/leave_school', [
             'as'    => 'hardware.leave_school',
-            'uses'  => 'StudentController@leaveSchoolHardWare'
+            'uses'  => 'StudentController@leaveSchool'
         ]);
+
+        // 모바일: 출결 기록 조회
+        Route::post('/mobile/attendance', 'StudentController@getAttendanceRecordsAtMobile');
 
         // 학생 계정 접속 이후 사용하는 기능들 => 로그인 여부 확인
         Route::middleware(['check.login'])->group(function() {
 
             // 학생 메인 페이지
-            Route::get('/', [
+            Route::get('/main', [
                 'as'    => 'index',
                 'uses'  => 'StudentController@index'
             ]);
@@ -103,12 +106,27 @@ Route::name('student.')->group(function() {
                 'uses'  => 'StudentController@info'
             ]);
 
+            /* 신규 추가 */
+            // 출결 관리 기능
+            Route::get('/attendanceManagement', function(){
+                return view('welcome');
+            });
+            // 학업 관리 기능
+            Route::get('/gradeManagement', function(){
+                return view('welcome');
+            });
+            // 상담 관리 기능
+            Route::get('/consultingManagement', function(){
+                return view('welcome');
+            });
+            /* End */
+
             // 출결 관리 기능
             Route::get('/attendance/{period?}/{date?}', [
                 'as'    => 'attendance',
                 'uses'  => 'StudentController@getAttendanceRecords'
             ]);
-
+            /*
             // 모바일: 등교 인증
             Route::post('/come_school', [
                 'as'    => 'come_school',
@@ -120,7 +138,7 @@ Route::name('student.')->group(function() {
                 'as'    => 'leave_school',
                 'uses'  => 'StudentController@leaveSchool'
             ]);
-
+            */
             // 학업 관리 기능
             Route::get('/lecture/{date?}', [
                 'as'    => 'lecture',
@@ -156,11 +174,32 @@ Route::name('tutor.')->group(function() {
         // 지도교수 로그인 이후 이용 가능 기능
         Route::middleware(['check.login'])->group(function() {
 
+
             // 지도교수 메인 페이지 출력
-            Route::get('/', [
+            Route::get('/main', [
                 'as'    => 'index',
                 'uses'  => 'TutorController@index'
             ]);
+
+
+            /* 신규 경로 추가 */
+            Route::get('/', function(){
+                return view('welcome');
+            });
+
+            Route::get('/attendance', function(){
+                return view('welcome');
+            });
+
+            Route::get('/studentManagement', function(){
+                return view('welcome');
+            });
+
+            Route::get('/alertStudentSetting', function(){
+                return view('welcome');
+            });
+
+            /* End */
 
             // 계정관리
             Route::get('/info', [
@@ -265,7 +304,7 @@ Route::name('professor.')->group(function() {
        Route::middleware(['check.login'])->group(function() {
 
            // 교과목교수 메인 페이지 출력
-           Route::get('/', [
+           Route::get('/main', [
                'as'     => 'index',
                'uses'   => 'ProfessorController@index'
            ]);
@@ -278,6 +317,23 @@ Route::name('professor.')->group(function() {
                'as'     => 'lecture.attendance.check',
                'uses'   => 'ProfessorController@checkAttendance'
            ]);
+
+
+           // 출석체크를 위한 학생명단
+           Route::get('/getData/attendanceCheck', [
+               'as'     => 'lecture.attendance.check',
+               'uses'   => 'ProfessorController@checkAttendance'
+           ]);
+
+           // 출석체크를 위한 학생명단
+           Route::get('/attendanceCheck', function(){
+               return view('welcome');
+           });
+
+           // 성적 등록
+           Route::get('/gradeRegister', function(){
+               return view('welcome');
+           });
 
 
            // 성적 조회
