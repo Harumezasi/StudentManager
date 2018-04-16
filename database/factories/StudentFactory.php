@@ -10,7 +10,7 @@ $factory->define(App\Student::class, function (Faker $faker) {
 
     return [
         "id"            => $std_id,
-        "password"      => password_hash('password', PASSWORD_DEFAULT),
+        "password"      => password_hash('aaaa', PASSWORD_DEFAULT),
         "group"         => $group_id,
         "name"          => $faker->unique()->name(),
         "phone"         => "01000000000",

@@ -32435,22 +32435,33 @@ __WEBPACK_IMPORTED_MODULE_0_vue___default.a.component('doughnut-chart', {
 //
 //
 //
-//
-//
-//
-//
-//
 
 /* harmony default export */ __webpack_exports__["a"] = ({
   data: function data() {
     return {
+      file: null,
       dialog1: false,
       dialog2: false
-      //csrf: ""
     };
   },
-  mounted: function mounted() {
-    //this.csrf = window.laravel.csrfToken;
+
+  methods: {
+    submitFile: function submitFile() {
+      var formData = new FormData();
+      formData.append('upload_file', this.file);
+      axios.post('/professor/scores/store/excel/import', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
+      }).then(function (response) {
+        console.log(response);
+      }).catch(function () {
+        console.log('FAILURE!!');
+      });
+    },
+    handleFileUpload: function handleFileUpload() {
+      this.file = this.$refs.upload_file.files[0];
+    }
   }
 });
 
@@ -55209,7 +55220,8 @@ webpackContext.id = 192;
                         Plugin.dynamicContainer = dynamicContainer;
                     },
                     show: function(modal, paramsOrProps, params) {
-                        "string" == typeof modal ? Plugin.event.$emit("toggle", modal, !0, paramsOrProps) : null === Plugin.dynamicContainer ? console.warn("[vue-js-modal] In order to render dynamic modals, a <modals-container> component must be present on the page") : Plugin.dynamicContainer.add(modal, paramsOrProps, params);
+                        var events = arguments.length > 3 && void 0 !== arguments[3] ? arguments[3] : {};
+                        "string" == typeof modal ? Plugin.event.$emit("toggle", modal, !0, paramsOrProps) : null === Plugin.dynamicContainer ? console.warn("[vue-js-modal] In order to render dynamic modals, a <modals-container> component must be present on the page") : Plugin.dynamicContainer.add(modal, paramsOrProps, params, events);
                     },
                     hide: function(name, params) {
                         Plugin.event.$emit("toggle", name, !1, params);
@@ -55524,6 +55536,9 @@ webpackContext.id = 192;
                         scrollable: this.scrollable && this.isAutoHeight
                     };
                 },
+                backgroundClickClass: function() {
+                    return [ "v--modal-background-click" ];
+                },
                 modalClass: function() {
                     return [ "v--modal-box", this.classes ];
                 },
@@ -55571,7 +55586,9 @@ webpackContext.id = 192;
                     if (visible !== state) {
                         var beforeEventName = visible ? "before-close" : "before-open";
                         "before-open" === beforeEventName ? (document.activeElement && document.activeElement.blur(), 
-                        reset && (this.setInitialSize(), this.shift.left = 0, this.shift.top = 0), scrollable && document.body.classList.add("v--modal-block-scroll")) : scrollable && document.body.classList.remove("v--modal-block-scroll");
+                        reset && (this.setInitialSize(), this.shift.left = 0, this.shift.top = 0), scrollable && (document.getElementsByTagName("html")[0].classList.add("v--modal-block-scroll"), 
+                        document.body.classList.add("v--modal-block-scroll"))) : scrollable && (document.getElementsByTagName("html")[0].classList.remove("v--modal-block-scroll"), 
+                        document.body.classList.remove("v--modal-block-scroll"));
                         var stopEventExecution = !1, stop = function() {
                             stopEventExecution = !0;
                         }, beforeEvent = this.genEventObject({
@@ -55658,14 +55675,15 @@ webpackContext.id = 192;
                 this.$modal._setDynamicContainer(this);
             },
             methods: {
-                add: function(modal, params, config) {
+                add: function(modal, params, config, events) {
                     var _this = this, id = this.uid++;
                     config = config ? Object.assign({}, config) : {}, config.name || (config.name = "_dynamic-modal-" + id), 
                     this.modals.push({
                         id: id,
                         component: modal,
                         params: params || {},
-                        config: config
+                        config: config,
+                        events: events
                     }), this.$nextTick(function() {
                         _this.$modal.show(config.name);
                     });
@@ -55797,7 +55815,7 @@ webpackContext.id = 192;
     }, function(module, exports, __webpack_require__) {
         exports = module.exports = __webpack_require__(1)(), exports.push([ module.i, "\n.vue-dialog div {\r\n  box-sizing: border-box;\n}\n.vue-dialog .dialog-flex {\r\n  width: 100%;\r\n  height: 100%;\n}\n.vue-dialog .dialog-content {\r\n  flex: 1 0 auto;\r\n  width: 100%;\r\n  padding: 15px;\r\n  font-size: 14px;\n}\n.vue-dialog .dialog-c-title {\r\n  font-weight: 600;\r\n  padding-bottom: 15px;\n}\n.vue-dialog .dialog-c-text {\n}\n.vue-dialog .vue-dialog-buttons {\r\n  display: flex;\r\n  flex: 0 1 auto;\r\n  width: 100%;\r\n  border-top: 1px solid #eee;\n}\n.vue-dialog .vue-dialog-buttons-none {\r\n  width: 100%;\r\n  padding-bottom: 15px;\n}\n.vue-dialog-button {\r\n  font-size: 12px !important;\r\n  background: transparent;\r\n  padding: 0;\r\n  margin: 0;\r\n  border: 0;\r\n  cursor: pointer;\r\n  box-sizing: border-box;\r\n  line-height: 40px;\r\n  height: 40px;\r\n  color: inherit;\r\n  font: inherit;\r\n  outline: none;\n}\n.vue-dialog-button:hover {\r\n  background: rgba(0, 0, 0, 0.01);\n}\n.vue-dialog-button:active {\r\n  background: rgba(0, 0, 0, 0.025);\n}\n.vue-dialog-button:not(:first-of-type) {\r\n  border-left: 1px solid #eee;\n}\r\n", "" ]);
     }, function(module, exports, __webpack_require__) {
-        exports = module.exports = __webpack_require__(1)(), exports.push([ module.i, "\n.v--modal-block-scroll {\r\n  position: absolute;\r\n  overflow: hidden;\r\n  width: 100vw;\n}\n.v--modal-overlay {\r\n  position: fixed;\r\n  box-sizing: border-box;\r\n  left: 0;\r\n  top: 0;\r\n  width: 100%;\r\n  height: 100vh;\r\n  background: rgba(0, 0, 0, 0.2);\r\n  z-index: 999;\r\n  opacity: 1;\n}\n.v--modal-overlay.scrollable {\r\n  height: 100%;\r\n  min-height: 100vh;\r\n  overflow-y: auto;\r\n  padding-bottom: 10px;\r\n  -webkit-overflow-scrolling: touch;\n}\n.v--modal-overlay .v--modal-box {\r\n  position: relative;\r\n  overflow: hidden;\r\n  box-sizing: border-box;\n}\n.v--modal-overlay.scrollable .v--modal-box {\r\n  margin-bottom: 2px;\r\n  /* transition: top 0.2s ease; */\n}\n.v--modal {\r\n  background-color: white;\r\n  text-align: left;\r\n  border-radius: 3px;\r\n  box-shadow: 0 20px 60px -2px rgba(27, 33, 58, 0.4);\r\n  padding: 0;\n}\n.v--modal.v--modal-fullscreen {\r\n  width: 100vw;\r\n  height: 100vh;\r\n  margin: 0;\r\n  left: 0;\r\n  top: 0;\n}\n.v--modal-top-right {\r\n  display: block;\r\n  position: absolute;\r\n  right: 0;\r\n  top: 0;\n}\n.overlay-fade-enter-active,\r\n.overlay-fade-leave-active {\r\n  transition: all 0.2s;\n}\n.overlay-fade-enter,\r\n.overlay-fade-leave-active {\r\n  opacity: 0;\n}\n.nice-modal-fade-enter-active,\r\n.nice-modal-fade-leave-active {\r\n  transition: all 0.4s;\n}\n.nice-modal-fade-enter,\r\n.nice-modal-fade-leave-active {\r\n  opacity: 0;\r\n  transform: translateY(-20px);\n}\r\n", "" ]);
+        exports = module.exports = __webpack_require__(1)(), exports.push([ module.i, "\n.v--modal-block-scroll {\r\n  overflow: hidden;\r\n  width: 100vw;\n}\n.v--modal-overlay {\r\n  position: fixed;\r\n  box-sizing: border-box;\r\n  left: 0;\r\n  top: 0;\r\n  width: 100%;\r\n  height: 100vh;\r\n  background: rgba(0, 0, 0, 0.2);\r\n  z-index: 999;\r\n  opacity: 1;\n}\n.v--modal-overlay.scrollable {\r\n  height: 100%;\r\n  min-height: 100vh;\r\n  overflow-y: auto;\r\n  -webkit-overflow-scrolling: touch;\n}\n.v--modal-overlay .v--modal-background-click {\r\n  min-height: 100%;\r\n  width: 100%;\r\n  padding-bottom: 10px;\n}\n.v--modal-overlay .v--modal-box {\r\n  position: relative;\r\n  overflow: hidden;\r\n  box-sizing: border-box;\n}\n.v--modal-overlay.scrollable .v--modal-box {\r\n  margin-bottom: 2px;\r\n  /* transition: top 0.2s ease; */\n}\n.v--modal {\r\n  background-color: white;\r\n  text-align: left;\r\n  border-radius: 3px;\r\n  box-shadow: 0 20px 60px -2px rgba(27, 33, 58, 0.4);\r\n  padding: 0;\n}\n.v--modal.v--modal-fullscreen {\r\n  width: 100vw;\r\n  height: 100vh;\r\n  margin: 0;\r\n  left: 0;\r\n  top: 0;\n}\n.v--modal-top-right {\r\n  display: block;\r\n  position: absolute;\r\n  right: 0;\r\n  top: 0;\n}\n.overlay-fade-enter-active,\r\n.overlay-fade-leave-active {\r\n  transition: all 0.2s;\n}\n.overlay-fade-enter,\r\n.overlay-fade-leave-active {\r\n  opacity: 0;\n}\n.nice-modal-fade-enter-active,\r\n.nice-modal-fade-leave-active {\r\n  transition: all 0.4s;\n}\n.nice-modal-fade-enter,\r\n.nice-modal-fade-leave-active {\r\n  opacity: 0;\r\n  transform: translateY(-20px);\n}\r\n", "" ]);
     }, function(module, exports, __webpack_require__) {
         exports = module.exports = __webpack_require__(1)(), exports.push([ module.i, "\n.vue-modal-resizer {\r\n  display: block;\r\n  overflow: hidden;\r\n  position: absolute;\r\n  width: 12px;\r\n  height: 12px;\r\n  right: 0;\r\n  bottom: 0;\r\n  z-index: 9999999;\r\n  background: transparent;\r\n  cursor: se-resize;\n}\n.vue-modal-resizer::after {\r\n  display: block;\r\n  position: absolute;\r\n  content: '';\r\n  background: transparent;\r\n  left: 0;\r\n  top: 0;\r\n  width: 0;\r\n  height: 0;\r\n  border-bottom: 10px solid #ddd;\r\n  border-left: 10px solid transparent;\n}\n.vue-modal-resizer.clicked::after {\r\n  border-bottom: 10px solid #369be9;\n}\r\n", "" ]);
     }, function(module, exports, __webpack_require__) {
@@ -55817,14 +55835,14 @@ webpackContext.id = 192;
                         id: "#modals-container"
                     }
                 }, _vm._l(_vm.modals, function(modal) {
-                    return _c("modal", _vm._b({
+                    return _c("modal", _vm._g(_vm._b({
                         key: modal.id,
                         on: {
                             closed: function($event) {
                                 _vm.remove(modal.id);
                             }
                         }
-                    }, "modal", modal.config, !1), [ _c(modal.component, _vm._b({
+                    }, "modal", modal.config, !1), modal.events), [ _c(modal.component, _vm._b({
                         tag: "component",
                         on: {
                             close: function($event) {
@@ -55912,7 +55930,9 @@ webpackContext.id = 192;
                     attrs: {
                         "aria-expanded": _vm.visible.toString(),
                         "data-modal": _vm.name
-                    },
+                    }
+                }, [ _c("div", {
+                    class: _vm.backgroundClickClass,
                     on: {
                         mousedown: function($event) {
                             $event.stopPropagation(), _vm.onBackgroundClick($event);
@@ -55947,7 +55967,7 @@ webpackContext.id = 192;
                     on: {
                         resize: _vm.onModalResize
                     }
-                }) : _vm._e() ], 2) : _vm._e() ]) ], 1) : _vm._e() ]);
+                }) : _vm._e() ], 2) : _vm._e() ]) ], 1) ]) : _vm._e() ]);
             },
             staticRenderFns: []
         }, module.exports.render._withStripped = !0;
@@ -71580,7 +71600,8 @@ var render = function() {
                                               attrs: {
                                                 action:
                                                   "/professor/scores/store/excel/export",
-                                                method: "post"
+                                                method: "post",
+                                                enctype: "multipart/form-data"
                                               }
                                             },
                                             [
@@ -71851,48 +71872,41 @@ var render = function() {
                                         },
                                         [
                                           _c(
-                                            "v-form",
+                                            "v-chip",
                                             {
                                               attrs: {
-                                                action:
-                                                  "/professor/scores/store/excel/import",
-                                                method: "post"
+                                                color: "secondary",
+                                                "text-color": "white"
                                               }
                                             },
-                                            [
-                                              _c(
-                                                "v-chip",
-                                                {
-                                                  attrs: {
-                                                    color: "secondary",
-                                                    "text-color": "white"
-                                                  }
-                                                },
-                                                [_vm._v("파일등록")]
-                                              ),
-                                              _vm._v(" "),
-                                              _c("input", {
-                                                attrs: {
-                                                  type: "file",
-                                                  name: "upload_file",
-                                                  id: "upload_file",
-                                                  required: "",
-                                                  accept: ".xlsx, .xls, .csv"
+                                            [_vm._v("파일등록")]
+                                          ),
+                                          _vm._v(" "),
+                                          _c("input", {
+                                            ref: "upload_file",
+                                            attrs: {
+                                              type: "file",
+                                              id: "file",
+                                              required: "",
+                                              accept: ".xlsx, .xls, .csv"
+                                            },
+                                            on: {
+                                              change: function($event) {
+                                                _vm.handleFileUpload()
+                                              }
+                                            }
+                                          }),
+                                          _vm._v(" "),
+                                          _c(
+                                            "button",
+                                            {
+                                              on: {
+                                                click: function($event) {
+                                                  _vm.submitFile()
                                                 }
-                                              }),
-                                              _vm._v(" "),
-                                              _c(
-                                                "v-btn",
-                                                {
-                                                  attrs: {
-                                                    color: "indigo",
-                                                    type: "submit"
-                                                  }
-                                                },
-                                                [_vm._v("성적 업로드")]
-                                              )
-                                            ],
-                                            1
+                                              }
+                                            },
+                                            [_vm._v("성적 업로드")]
                                           )
                                         ],
                                         1

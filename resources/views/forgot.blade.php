@@ -6,7 +6,7 @@
  * Time: 오후 7:48
  */
 ?>
-@extends('layouts.master')
+@extends('layouts.forgot_master')
 @section('body.section')
     <input type="button" id="button_search_id" value="@lang('account.search_id')">
     <input type="button" id="button_search_password" value="@lang('account.search_password')"><br>

@@ -12,7 +12,6 @@ use App\Http\Controllers\ConstantEnum;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Facade;
 use PHPUnit\Util\RegularExpression;
-use Validator;
 
 /**
  * 클래스명:                       TutorController
@@ -60,13 +59,12 @@ class TutorController extends Controller {
             return redirect(route('tutor.myclass.create'));
         }
 
-        /*
         // 지도반이 있으면 타이틀을 설정하고 메인 페이지로 이동
+        /*
         $data = [
             'title'     => __('page_title.tutor_index')
-        ];
+        ];*/
 
-        return view('tutor_main', $data);*/
         return view('welcome');
     }
 
@@ -356,29 +354,7 @@ class TutorController extends Controller {
             'care_data'         => $careData
         ];
 
-        /*return view('tutor_myclass_attendance', $data);*/
-        return response()->json($data, 200);
-    }
-
-    // 모바일: 오늘자 학생 출결기록 조회
-    public function getAttendanceRecordsOfTodayAtMobile(Request $request) {
-        // 유효성 검사
-        $validator = Validator::make($request->all(), [
-            'id'            => 'required'
-        ]);
-
-        if($validator->fails()) {
-            return response()->json(new ResponseObject(
-                false, "데이터 수신에 실패헸습니다."
-            ), 200);
-        }
-
-        // 출석 데이터 획득
-        //$professor = Professor::find()
-
-
-        return response()->json(new ResponseObject(
-        ), 200);
+        return $data;
     }
 
     /**
@@ -399,35 +375,28 @@ class TutorController extends Controller {
         // 01. 변수 설정
         $professor = Professor::find(session()->get('user')['info']->id);
         $studentList = $professor->selectStudentsOfMyClass($argOrder);
-        /*
-        $data = [
-            'title'         => __('page_title.tutor_myclass_manage'),
-            'order'         => $argOrder,
-            'student_list'  => $studentList->paginate(10)
-        ];
 
-        return view('tutor_myclass_manage', $data);
-        */
-        return $studentList->get()->all();
+        $data = $studentList->get()->all();
+
+
+        return $data;
     }
 
     // 모바일 => 내 학생 리스트 가져오기
     public function getMyStudentsListAtAndroid(Request $request) {
-        // 유효성 검사
-        $validator = Validator::make($request->all(), [
-            'id'            => 'required|exists:professors,id',
-            'order_style'   => 'in:id,name'
-        ]);
-
-        if($validator->fails()) {
-            return response()->json(new ResponseObject(
-                false, "데이터 수신에 실패헸습니다."
-            ), 200);
-        }
-
         // 데이터 획득
-        $profId = $request->post('id');
-        $orderStyle = $request->exists('order_style') ? $request->post('order_style') : 'id';
+        $profId = session()->get('user')['info']->id;
+        $orderStyle = $request->exists('order_style') ? $request->get('order_style') : 'id';
+        switch(strtolower($orderStyle)) {
+            case 'id':
+            case 'name':
+                break;
+            default:
+                return response()->json(new ResponseObject(
+                        "FALSE", "잘못된 정렬 방식입니다."
+                    ), 200
+                );
+        }
 
         $queryList = Professor::find($profId)->selectStudentsOfMyClass($orderStyle);
 
@@ -445,11 +414,7 @@ class TutorController extends Controller {
             ];
         }
 
-        $group_name = Professor::find($profId)->group()->get()[0]->name;
-
-        return response()->json(new ResponseObject(
-            true, ['class_name' => $group_name, 'student_list' => $studentsList]
-            ), 200);
+        return response()->json($studentsList, 200);
     }
 
     // 내 학생 상세정보 출력 - 출결 확인
@@ -513,9 +478,9 @@ class TutorController extends Controller {
 
         // 출결 데이터 획득
         $student = Student::find($studentInfo->id);
-        $recentlyAttendance = Attendance::selectAttendanceRecords($student->id, $startDate, $endDate)->get()->all()[0];
+        $recentlyAttendance = Attendance::selectAttendanceRecords($student->id, $startDate, $endDate);
         $attendanceAnalyze  = $student->selectRecentlyAttendanceRecords();
-        $attendanceRecords  = $student->selectMyAbsenceRecords()->paginate(10);
+        $attendanceRecords  = $student->selectMyAbsenceRecords();
 
         // 데이터 바인딩
         $data = [

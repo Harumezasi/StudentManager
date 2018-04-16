@@ -12,7 +12,6 @@ use App\Score;
 use App\Lecture;
 use Illuminate\Http\Request;
 use Psy\Exception\ErrorException;
-use Validator;
 
 /**
  * 클래스명:                       StudentController
@@ -53,12 +52,11 @@ class StudentController extends Controller {
      * @return                         \Illuminate\Contracts\View\Factory|\Illuminate\View\View
      */
     public function index() {
-        /*
         $data = [
             'title'     => __('page_title.student_index')
         ];
 
-        return view('student_main', $data);*/
+
         return view('welcome');
     }
 
@@ -254,7 +252,7 @@ class StudentController extends Controller {
      * 만든날:                         2018년 4월 01일
      *
      * 매개변수 목록
-     * @param string $argPeriod :             조회기간 설정
+     * @param $argPeriod :             조회기간 설정
      * @param $argDate :               조회일자
      *
      * 지역변수 목록
@@ -263,148 +261,60 @@ class StudentController extends Controller {
      * $data(array):                   View 단에 바인딩할 데이터
      *
      * 반환값
-     * @return                         array
+     * @return \Illuminate\Contracts\View\Factory|\Illuminate\View\View 예외
      *
      * 예외
+     * @throws                          NotAccessibleException
      */
-    public function getAttendanceRecords($argPeriod = 'weekly', $argDate = null) {
+    public function getAttendanceRecords($argPeriod = ConstantEnum::PERIOD['weekly'], $argDate = null) {
         // 01. 데이터 획득
         $std_id = session()->get('user')['info']->id;
         $attendanceData =
             app('App\Http\Controllers\AttendanceController')->getAttendanceRecords($std_id, $argPeriod, $argDate);
 
         // 해당 기간동안 출석 데이터가 없을 경우
-        $periodData = [];
+        $periodData = null;
         switch($argPeriod) {
-            case 'weekly':
-                $period = $this->getWeeklyValue($argDate);
-                $periodData = [
-                    'this'      => $period['this_week']->format('Y-m-').$period['this_week']->weekOfMonth,
-                    'prev'      => $period['prev_week']->format('Y-m-').$period['prev_week']->weekOfMonth,
-                    'next'      => !is_null($period['next_week']) ?
-                            $period['next_week']->format('Y-m-').$period['next_week']->weekOfMonth : null
-                ];
+            case ConstantEnum::PERIOD['weekly']:
+                $periodData = today()->format('Y-m-').today()->weekOfMonth;
                 break;
-            case 'monthly':
-                $period = $this->getMonthlyValue($argDate);
-                $periodData = [
-                    'this'      => $period['this_month']->format('Y-m'),
-                    'prev'      => $period['prev_month']->format('Y-m'),
-                    'next'      => !is_null($period['next_month']) ?
-                        $period['next_month']->format('Y-m') : null
-                ];
+            case ConstantEnum::PERIOD['monthly']:
+                $periodData = today()->format('Y-m');
                 break;
+        }
+        if(is_null($attendanceData) && (!is_null($argDate) || $argDate =! $periodData)) {
+            throw new NotAccessibleException(__('exception.ada_records_not_exists'));
         }
 
         // 02. 매개 데이터 삽입
         $data = [
-            //'title'                 => __('page_title.student_attendance'),
+            'title'                 => __('page_title.student_attendance'),
             'period'                => $argPeriod,
 
-            'date'                  => $periodData['this'],
-            'prev_date'             => $periodData['prev'],
-            'next_date'             => $periodData['next'],
+            'date'                  => $attendanceData['now_date'],
+            'prev_date'             => $attendanceData['prev_date'],
+            'next_date'             => $attendanceData['next_date'],
 
-            // 출석 데이터가 있으면 => 데이터 반환, 없으면 NULL 반환
-            //'attendance_data'       => $attendanceData,
+            'attendance_rate'       => number_format($attendanceData['rate'], 2),
+            'attendance'            => $attendanceData['query_result']->{ConstantEnum::ATTENDANCE['ada']},
+            'nearest_attendance'    => $attendanceData['query_result']->{ConstantEnum::ATTENDANCE['n_ada']},
 
-            'attendance_rate'       => $attendanceData['rate'],
-            'attendance'            => $attendanceData['attendance'],
-            'nearest_attendance'    => $attendanceData['nearest_attendance'],
+            'late'                  => $attendanceData['query_result']->{ConstantEnum::ATTENDANCE['late']},
+            'nearest_late'          => $attendanceData['query_result']->{ConstantEnum::ATTENDANCE['n_late']},
 
-            'late'                  => $attendanceData['late'],
-            'nearest_late'          => $attendanceData['nearest_late'],
+            'absence'               => $attendanceData['query_result']->{ConstantEnum::ATTENDANCE['absence']},
+            'nearest_absence'       => $attendanceData['query_result']->{ConstantEnum::ATTENDANCE['n_absence']},
 
-            'absence'               => $attendanceData['absence'],
-            'nearest_absence'       => $attendanceData['nearest_absence'],
-
-            'early'                 => $attendanceData['early'],
-            'nearest_early'         => $attendanceData['nearest_early'],
+            'early'                 => $attendanceData['query_result']->{ConstantEnum::ATTENDANCE['early']},
+            'nearest_early'         => $attendanceData['query_result']->{ConstantEnum::ATTENDANCE['n_early']},
         ];
 
-        //return view('student_attendance', $data);
         return $data;
-    }
-
-    // 모바일: 출결 기록 조회
-    public function getAttendanceRecordsAtMobile(Request $request) {
-        // 데이터 검증
-        $validator = Validator::make($request->all(), [
-            'stdId'         => 'required',
-            'period'        => 'required|in:weekly,monthly',
-            'date'          => 'required'
-        ]);
-
-        if($validator->fails()) {
-            return response()->json(new ResponseObject(
-                false, "데이터 수신에 실패헸습니다."
-            ), 200);
-        }
-
-        // 01. 데이터 획득
-        $std_id     = $request->post('stdId');
-        $reqPeriod  = $request->post('period');
-        $reqDate    = $request->post('date');
-
-        $attendanceData =
-            app('App\Http\Controllers\AttendanceController')->getAttendanceRecords($std_id, $reqPeriod, $reqDate);
-
-        // 해당 기간동안 출석 데이터가 없을 경우
-        $periodData = [];
-        switch($reqPeriod) {
-            case 'weekly':
-                $period = $this->getWeeklyValue($reqDate);
-                $periodData = [
-                    'this'      => $period['this_week']->format('Y-m-').$period['this_week']->weekOfMonth,
-                    'prev'      => $period['prev_week']->format('Y-m-').$period['prev_week']->weekOfMonth,
-                    'next'      => !is_null($period['next_week']) ?
-                        $period['next_week']->format('Y-m-').$period['next_week']->weekOfMonth : null
-                ];
-                break;
-            case 'monthly':
-                $period = $this->getMonthlyValue($reqDate);
-                $periodData = [
-                    'this'      => $period['this_month']->format('Y-m'),
-                    'prev'      => $period['prev_month']->format('Y-m'),
-                    'next'      => !is_null($period['next_month']) ?
-                        $period['next_month']->format('Y-m') : null
-                ];
-                break;
-        }
-
-        // 02. 매개 데이터 삽입
-        $data = [
-            //'title'                 => __('page_title.student_attendance'),
-            //'period'                => $reqPeriod,
-
-            'date'                  => $periodData['this'],
-            'prev_date'             => $periodData['prev'],
-            'next_date'             => $periodData['next'],
-
-            // 출석 데이터가 있으면 => 데이터 반환, 없으면 NULL 반환
-            //'attendance_data'       => $attendanceData,
-
-            //'attendance_rate'       => $attendanceData['rate'],
-            'attendance'            => $attendanceData['attendance'],
-            'nearest_attendance'    => $attendanceData['nearest_attendance'],
-
-            'late'                  => $attendanceData['late'],
-            'nearest_late'          => $attendanceData['nearest_late'],
-
-            'absence'               => $attendanceData['absence'],
-            'nearest_absence'       => $attendanceData['nearest_absence'],
-
-            'early'                 => $attendanceData['early'],
-            'nearest_early'         => $attendanceData['nearest_early'],
-        ];
-
-        //return view('student_attendance', $data);
-        return response()->json(new ResponseObject(true, $data), 200);
     }
 
     // 모바일 : 출석율 그래프 그리기
     public function getAttendanceGraph(Request $request) {
-        $stdId = $request->post('id');
+        $stdId = $request->get('id');
         $period = 'weekly';
         $date = null;
 
@@ -420,7 +330,7 @@ class StudentController extends Controller {
 
         return view('student_attendance_graph', $data);
     }
-/*
+
     // 모바일 : 출석체크
     public function comeSchool() {
         $id = session()->get('user')['info']->id;
@@ -430,24 +340,12 @@ class StudentController extends Controller {
             200
         );
     }
-*/
+
     // 하드웨어: 출석체크
-    public function comeSchool(Request $request) {
-        /*
+    public function comeSchoolHardWare(Request $request) {
         $this->validate($request, [
             'stdId'    => 'required|JSON'
-        ]);*/
-
-        // 유효성 검사
-        $validator = Validator::make($request->all(), [
-            'stdId'    => 'required|JSON'
         ]);
-
-        if($validator->fails()) {
-            return response()->json(new ResponseObject(
-                false, "데이터 수신에 실패헸습니다."
-            ), 200);
-        }
 
         $reqData    = json_decode($request->post('stdId'));
 
@@ -456,7 +354,7 @@ class StudentController extends Controller {
             200
         );
     }
-/*
+
     // 모바일 : 하교하기
     public function leaveSchool() {
         $id = session()->get('user')['info']->id;
@@ -466,24 +364,12 @@ class StudentController extends Controller {
             200
         );
     }
-*/
+
     // 하드웨어: 하교하기
-    public function leaveSchool(Request $request) {
-        /*
+    public function leaveSchoolHardWare(Request $request) {
         $this->validate($request, [
             'stdId'    => 'required|JSON'
-        ]);*/
-
-        // 유효성 검사
-        $validator = Validator::make($request->all(), [
-            'stdId'    => 'required|JSON'
         ]);
-
-        if($validator->fails()) {
-            return response()->json(new ResponseObject(
-                false, "데이터 수신에 실패헸습니다."
-            ), 200);
-        }
 
         $reqData    = json_decode($request->post('stdId'));
 
@@ -564,58 +450,6 @@ class StudentController extends Controller {
         return view('student_lecture', $data);
     }
 
-
-    // 모바일 : 과목 정보 불러오기
-    public function getLectureDataAtMobile(Request $request) {
-        // 유효성 검사
-        $validator = Validator::make($request->all(), [
-            'stdId'     => 'required',
-            'term'      => 'regex:/^[1-2][0-9]\d{2}-[1-4]$/'
-        ]);
-
-        if($validator->fails()) {
-            return response()->json(new ResponseObject(
-                false, "데이터 수신에 실패헸습니다."
-            ), 200);
-        }
-
-        //
-        $reqTerm        = $request->exists('term') ? $request->post('term') : null;
-        $term           = $this->getTermValue($reqTerm);
-        $thisTerm       = $term['this_term'];
-        $prevTerm       = $term['prev_term'];
-        $nextTerm       = $term['next_term'];
-        $stdId          = $request->post('stdId');
-
-        // 02. 학기 정보 설정
-        $term_info  = explode('-', $thisTerm);
-        $year       = $term_info[0];
-        $term       = $term_info[1];
-
-        // 03. 학업 데이터 추출
-        $dataList       =
-            app('App\Http\Controllers\StudyController')->getStudyAchievementList($stdId, $year, $term);
-
-        // 사진 URL 가공
-        foreach($dataList as $data) {
-            $data['prof_info']['face_photo'] = strlen($data['prof_info']['face_photo']) > 0 ?
-                url("/source/prof_face/{$data['prof_info']['face_photo']}") : url('/source/prof_face/default.png');
-        }
-
-        // 04. View 단에 전송할 데이터
-        $term = __('lecture.'.ConstantEnum::TERM[$term]);
-        $data = [
-            //'title'             => __('page_title.student_lecture'),
-            'lecture_list'      => $dataList,
-            'year'              => $year,
-            'term'              => $term,
-            'prev_term'         => $prevTerm,
-            'next_term'         => $nextTerm
-        ];
-
-        return response()->json(new ResponseObject(true, $data), 200);
-    }
-
     // 03-04. 상담관리
 
     /**
@@ -640,4 +474,3 @@ class StudentController extends Controller {
         return view('student_counsel', $data);
     }
 }
-

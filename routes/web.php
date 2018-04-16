@@ -71,28 +71,20 @@ Route::name('student.')->group(function() {
         ]);
 
         // 학생 출석 그래프 가져오기
-        Route::post('/attendance/graph', [
+        Route::get('/attendance/graph', [
             'as'    => 'attendance.graph',
             'uses'  => 'StudentController@getAttendanceGraph'
         ]);
 
-        // 하드웨어: 등교
         Route::post('/hardware/come_school', [
             'as'    => 'hardware.come_school',
-            'uses'  => 'StudentController@comeSchool'
+            'uses'  => 'StudentController@comeSchoolHardWare'
         ]);
 
-        // 하드웨어: 하교
         Route::post('/hardware/leave_school', [
             'as'    => 'hardware.leave_school',
-            'uses'  => 'StudentController@leaveSchool'
+            'uses'  => 'StudentController@leaveSchoolHardWare'
         ]);
-
-        // 모바일: 출결 기록 조회
-        Route::post('/mobile/attendance', 'StudentController@getAttendanceRecordsAtMobile');
-
-        // 모바일: 학생의 과목 정보 조회
-        Route::post('/mobile/lecture', 'StudentController@getLectureDataAtMobile');
 
         // 학생 계정 접속 이후 사용하는 기능들 => 로그인 여부 확인
         Route::middleware(['check.login'])->group(function() {
@@ -112,38 +104,38 @@ Route::name('student.')->group(function() {
             /* 신규 추가 */
             // 출결 관리 기능
             Route::get('/attendanceManagement', function(){
-                return view('welcome');
+              return view('welcome');
             });
             // 학업 관리 기능
             Route::get('/gradeManagement', function(){
-                return view('welcome');
+              return view('welcome');
             });
             // 상담 관리 기능
             Route::get('/consultingManagement', function(){
-                return view('welcome');
+              return view('welcome');
             });
             /* End */
 
-            // 출결 관리 기능
+            // 출결 관리 데이터 요청
             Route::get('/attendance/{period?}/{date?}', [
                 'as'    => 'attendance',
                 'uses'  => 'StudentController@getAttendanceRecords'
             ]);
-            /*
-            // 모바일: 등교 인증
-            Route::post('/come_school', [
+
+            // 등교 인증
+            Route::get('/come_school', [
                 'as'    => 'come_school',
                 'uses'  => 'StudentController@comeSchool'
             ]);
 
-            // 모바일: 하교 인증
-            Route::post('/leave_school', [
+            // 하교 인증
+            Route::get('/leave_school', [
                 'as'    => 'leave_school',
                 'uses'  => 'StudentController@leaveSchool'
             ]);
-            */
+
             // 학업 관리 기능
-            Route::get('/lecture', [
+            Route::get('/lecture/{date?}', [
                 'as'    => 'lecture',
                 'uses'  => 'StudentController@lectureMain'
             ]);
@@ -174,12 +166,8 @@ Route::name('tutor.')->group(function() {
             'uses'  => 'TutorController@check_join'
         ]);
 
-        // 모바일 - 내 지도반 학생 리스트 출력
-        Route::post('/myclass/student_list', 'TutorController@getMyStudentsListAtAndroid');
-
         // 지도교수 로그인 이후 이용 가능 기능
         Route::middleware(['check.login'])->group(function() {
-
 
             // 지도교수 메인 페이지 출력
             Route::get('/main', [
@@ -187,25 +175,30 @@ Route::name('tutor.')->group(function() {
                 'uses'  => 'TutorController@index'
             ]);
 
-
             /* 신규 경로 추가 */
             Route::get('/', function(){
-                return view('welcome');
+              return view('welcome');
             });
 
             Route::get('/attendance', function(){
-                return view('welcome');
+              return view('welcome');
             });
 
             Route::get('/studentManagement', function(){
-                return view('welcome');
+              return view('welcome');
             });
 
             Route::get('/alertStudentSetting', function(){
-                return view('welcome');
+              return view('welcome');
             });
 
             /* End */
+            // 계정관리
+            Route::get('/myclass/attendance', [
+                'as'    => 'myclass.attendance',
+                'uses'  => 'TutorController@getAttendanceRecordsOfToday'
+            ]);
+
 
             // 계정관리
             Route::get('/info', [
@@ -214,29 +207,11 @@ Route::name('tutor.')->group(function() {
             ]);
 
             // 지도반 관련
+
             // 내 지도반 관리
             Route::get('/myclass/manage/{order?}', [
                 'as'    => 'myclass.manage',
                 'uses'  => 'TutorController@manageMyClass'
-            ]);
-
-            // 오늘자 등/하교 출력
-            Route::get('/myclass/attendance', [
-                'as'    => 'myclass.attendance',
-                'uses'  => 'TutorController@getAttendanceRecordsOfToday'
-            ]);
-
-
-            // 학생 상세정보 => 출결 확인
-            Route::get('/details/attendance/{std_id}/{period?}/{date?}', [
-                'as'    => 'details.attendance',
-                'uses'  => 'TutorController@detailsOfAttendance'
-            ]);
-
-            // 학생 상세정보 => 성적 확인
-            Route::get('/details/scores/{std_id}/{lecture_id?}', [
-                'as'    => 'details.scores',
-                'uses'  => 'TutorController@detailsOfScores'
             ]);
 
             // 내 지도반 생성
@@ -251,7 +226,7 @@ Route::name('tutor.')->group(function() {
                 'uses'  => 'TutorController@viewNeedCareConfig'
             ]);
 
-            // 알림 저장
+            // 알림 설정 저장
             Route::post('/myclass/needcare/store', [
                 'as'    => 'myclass.needcare.store',
                 'uses'  => 'TutorController@storeNeedCare'
@@ -272,12 +247,19 @@ Route::name('tutor.')->group(function() {
                 'uses'  => 'TutorController@selectStudentsListAtExcel'
             ]);
 
-            // 조회한 학생 목록에서 엑셀 파일 저장
+            // 조회한 학생 목록에서
             Route::post('/config/store/student/excel/store', [
                 'as'    => 'config.store.student.excel.insert',
                 'uses'  => 'TutorController@insertStudentsList'
             ]);
+
+
+
         });
+
+        // 모바일
+
+        Route::post('/myclass/student_list', 'TutorController@getMyStudentsListAtAndroid');
     });
 });
 
@@ -301,8 +283,8 @@ Route::name('professor.')->group(function() {
 
 
        // 학생 관리
-       // 모바일 : 학생 리스트 조회
-       Route::post('/students_list', 'ProfessorController@getMyStudentsList');
+       // 프론트엔드 : 학생 리스트 조회
+       Route::get('/students_list', 'ProfessorController@getMyStudentsList');
 
        // 교과목교수 로그인 이후 사용 가능 기능
        Route::middleware(['check.login'])->group(function() {
@@ -316,14 +298,8 @@ Route::name('professor.')->group(function() {
            // 수강반 관리
 
            // 출결 관리
+
            // 출석체크
-           Route::get('/lecture/check_attendance', [
-               'as'     => 'lecture.attendance.check',
-               'uses'   => 'ProfessorController@checkAttendance'
-           ]);
-
-
-           // 출석체크를 위한 학생명단
            Route::get('/getData/attendanceCheck', [
                'as'     => 'lecture.attendance.check',
                'uses'   => 'ProfessorController@checkAttendance'
@@ -331,14 +307,13 @@ Route::name('professor.')->group(function() {
 
            // 출석체크를 위한 학생명단
            Route::get('/attendanceCheck', function(){
-               return view('welcome');
+             return view('welcome');
            });
 
            // 성적 등록
            Route::get('/gradeRegister', function(){
-               return view('welcome');
+             return view('welcome');
            });
-
 
            // 성적 조회
            Route::get('/details/scores/{stdId}', [
@@ -353,12 +328,10 @@ Route::name('professor.')->group(function() {
            ]);
 
            // 성적 관리
-           Route::get('/scores/store', [
+           Route::get('/gradeRegister', [
                 'as'    => 'scores.store.main',
                 'uses'  => function() {
-                    return view('professor_score_store', [
-                        'title' => __('page_title.professor_score_store_main'),
-                    ]);
+                    return view('welcome');
                 }
            ]);
 
@@ -368,7 +341,6 @@ Route::name('professor.')->group(function() {
                 'uses'  => 'ProfessorController@exportScoresExcelForm'
            ]);
 
-           // 엑셀 입력
            Route::post('/scores/store/excel/import', [
                'as'     => 'scores.store.excel.import',
                'uses'   => 'ProfessorController@storeScoreAtExcel'

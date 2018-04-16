@@ -64,13 +64,43 @@ class AttendanceController extends Controller {
     public function getAttendanceRecords($argStdId, $argPeriod, $argDate) {
         // 01. 데이터 가져오기
         // 조회 날짜 획득
-        $date = null;
-        switch($argPeriod) {
-            case 'weekly':
-                $date = $this->getWeeklyValue($argDate)['this_week'];
+        $date           = null;
+        $nowDate        = null;
+        $prevDate       = null;
+        $nextDate       = null;
+        $formatDay      = "Y-m-d";
+        $formatMonth    = "Y-m";
+        // 설정 조회기간에 따른 날짜 데이터 획득
+        if(is_null($argDate)) {
+            switch($argPeriod) {
+                case ConstantEnum::PERIOD['weekly']:
+                    $argDate = today()->format('Y-m-').today()->weekOfMonth;
+                    break;
+                case ConstantEnum::PERIOD['monthly']:
+                    $argDate = today()->format('Y-m');
+                    break;
+            }
+        }
+
+        if($argPeriod === ConstantEnum::PERIOD['weekly']) {
+            $date = $this->getWeeklyValue($argDate);
+        } else if($argPeriod === ConstantEnum::PERIOD['monthly']) {
+            $date = $this->getMonthlyValue($argDate);
+        }
+
+        // 각 기간에 대한 문자열 추출
+        switch ($argPeriod) {
+            // 주 단위
+            case ConstantEnum::PERIOD['weekly'];
+                $nowDate    = $date['this_week']->copy()->format($formatMonth).'-'.$date['this_week']->copy()->weekOfMonth;
+                $prevDate   = $date['prev_week']->copy()->format($formatMonth).'-'.$date['prev_week']->copy()->weekOfMonth;
+                $nextDate   = is_null($date['next_week']) ? NULL : $date['next_week']->copy()->format($formatMonth).'-'.$date['next_week']->copy()->weekOfMonth;
                 break;
-            case 'monthly':
-                $date = $this->getMonthlyValue($argDate)['this_month'];
+            // 월 단위
+            case ConstantEnum::PERIOD['monthly'];
+                $nowDate    = $date['this_month']->copy()->format($formatMonth);
+                $prevDate   = $date['prev_month']->copy()->format($formatMonth);
+                $nextDate   = is_null($date['next_month']) ? NULL : $date['next_month']->copy()->format($formatMonth);
                 break;
         }
 
@@ -78,30 +108,36 @@ class AttendanceController extends Controller {
         $std_id = $argStdId;
 
         // DB 조회
+        $db = new Attendance();
         $result = NULL;
         if ($argPeriod === ConstantEnum::PERIOD['weekly']) {
             // 조회단위가 주인 경우 -> 이번주의 출석 기록을 조회
-            $result = Attendance::selectAttendanceRecords($std_id,
-                $date->copy()->startOfWeek()->format('Y-m-d'),
-                $date->copy()->endOfWeek()->format('Y-m-d'))
-                ->get()->all()[0];
+            $result = $db->selectAttendanceRecords($std_id,
+                $date['this_week']->copy()->startOfWeek()->format($formatDay),
+                $date['this_week']->copy()->endOfWeek()->format($formatDay));
         } else if ($argPeriod === ConstantEnum::PERIOD['monthly']) {
             // 조회단위가 달인 경우 -> 이번달의 출석기록을 조회
-            $result = Attendance::selectAttendanceRecords($std_id,
-                $date->copy()->startOfMonth()->format('Y-m-d'),
-                $date->copy()->endOfMonth()->format('Y-m-d'))
-                ->get()->all()[0];
+            $result = $db->selectAttendanceRecords($std_id,
+                $date['this_month']->copy()->startOfMonth()->format($formatDay),
+                $date['this_month']->copy()->endOfMonth()->format($formatDay));
         }
+
+        /*
+        if(($result->{ConstantEnum::ATTENDANCE['ada']} + $result->{ConstantEnum::ATTENDANCE['absence']}) <= 0) {
+            return NULL;
+        }*/
 
         // 출석율 계산
-        if(($total_ada = $result->{ConstantEnum::ATTENDANCE['ada']} + $result->{ConstantEnum::ATTENDANCE['absence']}) > 0) {
-            $rate = ($result->{ConstantEnum::ATTENDANCE['ada']} / $total_ada) * 100;
-            $result['rate'] = number_format($rate, 2);
-        } else {
-            $result['rate'] = 0;
-        }
+        $rate = ($result->{ConstantEnum::ATTENDANCE['ada']} /
+                ($result->{ConstantEnum::ATTENDANCE['ada']} + $result->{ConstantEnum::ATTENDANCE['absence']})) * 100;
 
-        return $result;
+        return [
+            'query_result'  => $result,
+            'now_date'      => $nowDate,
+            'prev_date'     => $prevDate,
+            'next_date'     => $nextDate,
+            'rate'          => $rate
+        ];
     }
 
     // 학생 등교
@@ -117,7 +153,7 @@ class AttendanceController extends Controller {
             // 등교 일자가 오늘이라면 => 함수 종료
             if ($recent_attd->reg_date == today()->format('Y-m-d')) {
                 return new ResponseObject(
-                    false,
+                    "false",
                     "오늘 등교하셨습니다."
                 );
             }
@@ -128,7 +164,7 @@ class AttendanceController extends Controller {
                 if (is_null($recent_attd->leave_school)) {
                     // => 지난 번에 등교하고 하교를 하지 않음 => 하교 하라는 메시지 출력
                     return new ResponseObject(
-                        false,
+                        'false',
                         '하교를 하지 않으셨습니다. 하교를 먼저 해주세요.'
                     );
                 }
@@ -138,14 +174,14 @@ class AttendanceController extends Controller {
         // 출석 데이터 생성
         if (Attendance::insertAttendance($student->id) === false) {
             return new ResponseObject(
-                false,
+                'false',
                 '데이터 생성 실패'
             );
         }
 
         // 출석이 끝나면 => 성공 메시지 반환
         return new ResponseObject(
-            true,
+            'true',
             __('message.login_success', ['name' => $student->name])
         );
     }
@@ -164,7 +200,7 @@ class AttendanceController extends Controller {
         if(!is_null($recent_attd->leave_school) ||
             (is_null($recent_attd->come_school) && is_null($recent_attd->leave_school))) {
             return new ResponseObject(
-                false,
+                "false",
                 "최근 등교기록이 없습니다. 등교를 우선 해주세요."
             );
         }
@@ -172,14 +208,14 @@ class AttendanceController extends Controller {
         // 출석 데이터 생성
         if(Attendance::updateAttendanceAtLeaveSchool($student->id) === false) {
             return new ResponseObject(
-                false,
+                'false',
                 '데이터 생성 실패'
             );
         }
 
         // 출석이 끝나면 => 성공 메시지 반환
         return new ResponseObject(
-            true,
+            'true',
             '고생하셨습니다.'
         );
     }

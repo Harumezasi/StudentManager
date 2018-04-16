@@ -277,7 +277,7 @@ class Professor extends Model {
     // 내 지도 학생 목록을 출력
     public function selectStudentsOfMyClass($argOrderStyle) {
         return $this->group()->get()[0]->students()
-            ->leftJoin('sign_up_lists', 'students.id', 'sign_up_lists.std_id')
+            ->join('sign_up_lists', 'students.id', 'sign_up_lists.std_id')
             ->selectRaw('students.id, students.name, students.face_photo, '.
                 'round((avg(sign_up_lists.achievement) * 100), 0) as "achievement"')
             ->groupBy('students.id')->orderBy("students.{$argOrderStyle}");

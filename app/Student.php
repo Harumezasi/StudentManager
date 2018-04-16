@@ -253,14 +253,14 @@ class Student extends Model {
                     ->where(DbInfoEnum::SCORES['t_name'].'.'.DbInfoEnum::SCORES['lecture'], $argLectureId);
             })->selectRaw(
                 DbInfoEnum::SCORES['t_name'].'.'.DbInfoEnum::SCORES['reg_date'].",
-                CASE ".DBInfoEnum::SCORES['t_name'].'.'.DbInfoEnum::SCORES['type']." 
+                CASE ".DBInfoEnum::SCORES['t_name'].'.'.DbInfoEnum::SCORES['type']."
                 WHEN ".ConstantEnum::SCORE['midterm']." THEN '".__('lecture.midterm')."'
                 WHEN ".ConstantEnum::SCORE['final']." THEN '".__('lecture.final')."'
                     WHEN ".ConstantEnum::SCORE['quiz']." THEN '".__('lecture.quiz')."'
-                WHEN ".ConstantEnum::SCORE['task']." THEN '".__('lecture.task')."' 
-                END AS '".DbInfoEnum::SCORES['type']."', 
-                ".DBInfoEnum::SCORES['t_name'].'.'.DbInfoEnum::SCORES['content'].", 
-                ".DBInfoEnum::GAINED_SCORES['t_name'].'.'.DbInfoEnum::GAINED_SCORES['score'].", 
+                WHEN ".ConstantEnum::SCORE['task']." THEN '".__('lecture.task')."'
+                END AS '".DbInfoEnum::SCORES['type']."',
+                ".DBInfoEnum::SCORES['t_name'].'.'.DbInfoEnum::SCORES['content'].",
+                ".DBInfoEnum::GAINED_SCORES['t_name'].'.'.DbInfoEnum::GAINED_SCORES['score'].",
                 ".DBInfoEnum::SCORES['t_name'].'.'.DbInfoEnum::SCORES['prefect']
             )->orderBy(DbInfoEnum::SCORES['t_name'].'.'.DbInfoEnum::SCORES['reg_date'], 'desc');
 
@@ -386,8 +386,8 @@ class Student extends Model {
         $queryResult = $joinResult
             ->select(
             // 총 출석 횟수
-            DB::raw("(COUNT('attendances.id') - 
-                        COUNT(CASE come_schools.lateness_flag WHEN TRUE THEN TRUE END) - 
+            DB::raw("(COUNT('attendances.id') -
+                        COUNT(CASE come_schools.lateness_flag WHEN TRUE THEN TRUE END) -
                         COUNT(CASE attendances.absence_flag WHEN TRUE THEN TRUE END)) AS 'total_ada'"),
             // 총 지각 횟수
             DB::raw("COUNT(CASE come_schools.lateness_flag WHEN TRUE THEN TRUE END) AS 'total_late'"),
@@ -424,7 +424,8 @@ class Student extends Model {
                 'attendances.reg_date AS reg_date', 'come_schools.reg_time AS come',
                 'leave_schools.reg_time AS leave', 'come_schools.lateness_flag AS late',
                 'leave_schools.early_flag AS early', 'attendances.absence_flag AS absence'
-            )->orderBy('attendances.reg_date', 'desc');
+            )->orderBy('attendances.reg_date', 'desc')
+            ->paginate(10);
     }
 
     // 자신의 오늘 출석 기록을 조회
@@ -447,7 +448,7 @@ class Student extends Model {
         $todayAttendance        = $this->selectAttendanceRecordOfToday()->get()[0]->toArray();
         $consecutiveAttendance  = $this->selectConsecutiveAttendanceData($argDaysUnit);
         $totalAttendance        = $this->selectRecentlyAttendanceRecords($argDaysUnit);
-
+        
         return [
             // 학생 정보
             'id'                    => $todayAttendance['id'],
@@ -469,5 +470,6 @@ class Student extends Model {
             'total_absence'         => $totalAttendance['total_absence'],
             'total_early'           => $totalAttendance['total_early']
         ];
+
     }
 }

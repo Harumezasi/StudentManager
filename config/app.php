@@ -161,11 +161,7 @@ return [
         App\Providers\EventServiceProvider::class,
         App\Providers\RouteServiceProvider::class,
 
-        // 새로 설치한 라이브러리
-
-        Laracasts\Flash\FlashServiceProvider::class,
-        Collective\Html\HtmlServiceProvider::class,
-        Maatwebsite\Excel\ExcelServiceProvider::class,
+        Laracasts\Flash\FlashServiceProvider::class
     ],
 
     /*
@@ -215,12 +211,7 @@ return [
         'Validator' => Illuminate\Support\Facades\Validator::class,
         'View' => Illuminate\Support\Facades\View::class,
 
-        // 사용자 정의
-
-        'Flash'         => Laracasts\Flash\Flash::class,
-        'Form'          => Collective\Html\FormFacade::class,
-        'Html'          => Collective\Html\HtmlFacade::class,
-        'Excel'         => Maatwebsite\Excel\Facades\Excel::class,
+        'Flash' => Laracasts\Flash\Flash::class
     ],
 
 ];

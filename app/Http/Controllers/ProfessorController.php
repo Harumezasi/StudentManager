@@ -6,8 +6,8 @@ use App\Exceptions\NotAccessibleException;
 use App\Http\DbInfoEnum;
 use App\Professor;
 use App\Student;
+use App\Http\Controllers\TutorController;
 use App\Http\Controllers\ConstantEnum;
-use Validator;
 use Illuminate\Http\Request;
 
 /**
@@ -49,12 +49,10 @@ class ProfessorController extends Controller {
      * @return                         \Illuminate\Contracts\View\Factory|\Illuminate\View\View
      */
     public function index() {
-        /*
         $data = [
             'title'     => __('page_title.professor_index')
         ];
 
-        return view('professor_main', $data);*/
         return view('welcome');
     }
 
@@ -243,36 +241,17 @@ class ProfessorController extends Controller {
         $professor      = Professor::find(session()->get('user')['info']->id);
         $studentsList   = $professor->getStudentsListOfMyLecture();
 
-        return $studentsList;
-        /*
-        $data = [
-            'title'         => __('page_title.professor_check_attendance'),
-            'studentList'   => $studentsList,
-        ];
+        $data = $studentsList;
 
-        return view('professor_check_attendance', $data);*/
+        return $data;
     }
 
-    // 모바일 :: 학생 리스트 출력
     public function getMyStudentsList(Request $request) {
-        /*
         $this->validate($request, [
-            'id'    => 'required|exists:professors,id'
-        ]);*/
-
-        // 유효성 검사
-        $validator = Validator::make($request->all(), [
             'id'    => 'required|exists:professors,id'
         ]);
 
-        if($validator->fails()) {
-            return response()->json(new ResponseObject(
-                false, "존재하지 않는 ID입니다."
-            ), 200);
-        }
-
-
-        $professor = Professor::find($request->post('id'));
+        $professor = Professor::find($request->get('id'));
         $studentsList = $professor->getStudentsListOfMyLecture();
 
         return response()->json($studentsList, 200);
@@ -343,12 +322,11 @@ class ProfessorController extends Controller {
         $this->validate($request, [
             'upload_file'       => 'required|file|mimes:xlsx,xls,csv',
         ]);
-
+        
         // 02. 변수 설정
         $file = $request->file('upload_file');
         $fileType = ($array = explode('.', $file->getClientOriginalName()))[sizeof($array) - 1];
-
-        return app('App\Http\Controllers\ExcelController')->importScoreForm($file->path(), $fileType);
+        app('App\Http\Controllers\ExcelController')->importScoreForm($file->path(), $fileType);
     }
 
     // 성적을 직접 등록하는 페이지를 출력

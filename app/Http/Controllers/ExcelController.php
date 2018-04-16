@@ -52,6 +52,7 @@ class ExcelController extends Controller {
 
     // 교과목교수: 엑셀을 이용한 성적 등록
     public function importScoreForm($argFilePath, $argFileType) {
+
         // 01. 전송받은 파일 해석
         $reader = IOFactory::createReader($this->getType($argFileType));
         $reader->setReadDataOnly(true);
@@ -108,7 +109,6 @@ class ExcelController extends Controller {
             if($key < 6) {
                 continue;
             }
-
             $stdId = NULL;
             $score = NULL;
             // 행에서 셀을 추출하여 순환
@@ -140,6 +140,7 @@ class ExcelController extends Controller {
             // 데이터 삽입
             $extractData['std_list'][$stdId] = $score;
         }
+
         // 새로운 점수 유형 생성
         $score = new Score();
         $score->lecture_id      = $extractData['lecture_id'];
@@ -150,11 +151,10 @@ class ExcelController extends Controller {
 
         // 각 학생별로 취득 점수 등록
         if($score->insertScoreList($score, $extractData['std_list'])) {
-            flash()->success('성적 등록에 성공하였습니다.');
-
-            //return back();
+            //flash()->success('성적 등록에 성공하였습니다.');
+            //return redirect(route('professor.scores.store.main'));
         } else {
-            throw new NotAccessibleException('데이터 등록에 실패하였습니다.');
+          throw new NotAccessibleException('데이터 등록에 실패하였습니다.');
         }
     }
 
@@ -176,7 +176,7 @@ class ExcelController extends Controller {
             $filteredList = array_filter($freshmanList, function($value) {
                 return preg_match('#^J[1-9]+$#', strtoupper($value['E']));
             });
-            
+
             foreach($filteredList as $rowKey => $rowValue) {
                 $studentList[$rowValue['E']][] = [
                     'id'        => $rowValue['C'],

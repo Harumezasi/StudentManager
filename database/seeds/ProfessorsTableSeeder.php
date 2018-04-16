@@ -29,7 +29,7 @@ class ProfessorsTableSeeder extends Seeder
                 $professor->id          = $id;
                 $professor->manager     = $tutor->id;
                 $professor->expire_date = "2018-12-31";
-                $professor->password    = password_hash('password', PASSWORD_DEFAULT);
+                $professor->password    = password_hash('aaaa', PASSWORD_DEFAULT);
                 $professor->name        = '교수'.(($key * sizeof($tutors)) + $iCount);
                 $professor->phone       = '01012345678';
                 $professor->email       = $id.'@exam.com';

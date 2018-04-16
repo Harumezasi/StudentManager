@@ -6,45 +6,73 @@
  * Time: 오후 7:10
  */
 ?>
-<table border="1">
-    <tbody>
-    <tr>
-        {{-- 사이트 로고 -> 메인 페이지로 이동 --}}
-        <th rowspan="2">
-            <span><a href="{{ route('professor.index') }}">&lt;교과목교수&gt;프로젝트 로고</a></span>
-        </th>
 
-        {{-- 각 기능의 타이틀 - 중요한거 아님 --}}
-        <td colspan="3">@lang('account.title')</td>
-        <td colspan="5">@lang('lecture.class')</td>
-        <td colspan="2">@lang('counsel.title')</td>
-    </tr>
-    <tr>
-        {{-- 계정관리 기능별 링크 --}}
-            <!-- 내 정보 열람 -->
-        <td>@lang('account.myinfo')</td>
-            <!-- 계정 정보 수정 -->
-        <td>@lang('account.myinfo_update')</td>
-            <!-- 간편계정 관리 -->
-        <td>@lang('account.account_sync_manage')</td>
+<div id='professor_menu'>
+  <div class='professor_top_menu'>
+    <div>&lt;교과목교수&gt;프로젝트 로고</div>
+    <a href="#" v-on:mouseover="menu_change(1)"><div>회원정보</div></a>
+    <a href="{{ route('professor.lecture.main') }}" v-on:mouseover="menu_change(2)"><div>수강반</div></a>
+    <a href="#" v-on:mouseover="menu_change(3)"><div>상담관리</div></a>
+  </div>
+  <div class='professor_bottom_menu' v-if="menuNumber != 0">
+    <div class='professor_bottom_menu_info' v-if="menuNumber == 1" style="background-color:gray">테스트1</div>
+    <div class='professor_bottom_menu_lecture' v-else-if="menuNumber == 2" style="background-color:yellow">테스트2</div>
+    <div class='professor_bottom_menu_advice' v-else-if="menuNumber == 3" style="background-color:cyan">테스트3</div>
+  </div>
+</div>
+@section('script_toolbar')
+<script>
+  new Vue({
+    el:'#professor_menu',
+    data : {
+      menuNumber : 0
+    },
+    methods : {
+      menu_change : function(num){
+        this.menuNumber = num;
+        console.log(this.menuNumber);
+      }
+    }
+  })
+</script>
+@endsection
+@section('style_toolbar')
+<style>
+#professor_menu {
 
-        {{-- 수강반 관리 --}}
-            <!-- 출석 체크 -->
-        <td><a href="{{ route('professor.lecture.attendance.check') }}">@lang('attendance.check')</a></td>
-            <!-- 출석 내역 확인 -->
-        <td>@lang('attendance.select_records')</td>
-            <!-- 성적 등록 -->
-        <td><a href="{{ route('professor.scores.store.main') }}">@lang('lecture.store')</a></td>
-            <!-- 성적 조회 -->
-        <td>@lang('lecture.select')</td>
-            <!-- 성적 반영비 수정 -->
-        <td>@lang('lecture.update_reflection')</td>
+}
 
-        {{-- 상담 관리 --}}
-            <!-- 받은 상담요청 확인 -->
-        <td>@lang('counsel.show_reception')</td>
-            <!-- 상담 요청하기 -->
-        <td>@lang('counsel.ask')</td>
-    </tr>
-    </tbody>
-</table>
+.professor_top_menu {
+  width : 100%;
+  min-width: 1500px;
+  height: 100px;
+  border: 1px solid black;
+}
+
+.professor_top_menu div {
+  float: left;
+  width : 300px;
+  height: 100px;
+  margin : 0px 25px;
+  border: 1px solid black;
+}
+
+.professor_top_menu a {
+  width: 100%;
+  height: 100%;
+}
+
+.professor_bottom_menu {
+  width: 100%;
+  min-width: 1500px;
+  height: 50px;
+  background-color: black;
+}
+
+.professor_bottom_menu div {
+  width : 300px;
+  height: 50px;
+  border: 1px solid black;
+}
+</style>
+@endsection

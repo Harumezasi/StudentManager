@@ -6,4 +6,17 @@
  * Time: 오후 12:32
  */
 ?>
-<span><a href="{{ route('home.logout') }}">@lang('interface.logout')</a></span>
+<div>
+  <span>{{ session()->get('user')['info']->name }}</span>님 안녕하세요.
+  <a href="{{ route('home.logout') }}">
+    <Button id="logout_Button">@lang('interface.logout')</button>
+  </a>
+</div>
+@section('style_logout')
+<style>
+  #logout_Button {
+    width: 100px;
+    height: 50px;
+  }
+</style>
+@endsection

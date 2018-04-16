@@ -106,10 +106,25 @@ class Attendance extends Model {
         $dbInfoLeave    = DbInfoEnum::LEAVE_SCHOOLS;
         $constList      = ConstantEnum::ATTENDANCE;
 
-        return Attendance::where([
-            ['std_id', $argStdId], ['reg_date', '>=', "{$startDate}"], ['reg_date', '<=', "{$endDate}"]
-            ])->join('come_schools', 'attendances.come_school', 'come_schools.id')
-            ->leftJoin('leave_schools', 'attendances.leave_school', 'leave_schools.id')
+        return Attendance::
+            where([
+                [DbInfoEnum::ATTENDANCES['std_id'], $argStdId],
+                [DbInfoEnum::ATTENDANCES['reg_date'], '>=', $startDate],
+                [DbInfoEnum::ATTENDANCES['reg_date'], '<=', $endDate]
+            ])
+            // where([['std_id', $std_id], ['reg_date', '>=', $start_date], ['reg_date', '<=', $end_date]])
+            ->join(
+                DbInfoEnum::COME_SCHOOLS['t_name'],
+                DbInfoEnum::ATTENDANCES['t_name'].'.'.DbInfoEnum::ATTENDANCES['come'],
+                DbInfoEnum::COME_SCHOOLS['t_name'].'.'.DbInfoEnum::COME_SCHOOLS['id']
+            )
+            // join('come_schools', 'attendances.come_school', 'come_schools.id')
+            ->join(
+                DbInfoEnum::LEAVE_SCHOOLS['t_name'],
+                DbInfoEnum::ATTENDANCES['t_name'].'.'.DbInfoEnum::ATTENDANCES['leave'],
+                DbInfoEnum::LEAVE_SCHOOLS['t_name'].'.'.DbInfoEnum::LEAVE_SCHOOLS['id']
+            )
+            // join('leave_schools', 'attendances.leave_school', 'leave_schools.id')
             ->selectRaw("
                 (COUNT('attendances.id') - COUNT(CASE come_schools.lateness_flag WHEN TRUE THEN TRUE END) - COUNT(CASE attendances.absence_flag WHEN TRUE THEN TRUE END)) AS '{$constList['ada']}', 
                 DATE_FORMAT(MAX(CASE WHEN {$dbInfoSelf['t_name']}.{$dbInfoSelf['absence']} IS NULL THEN {$dbInfoSelf['t_name']}.{$dbInfoSelf['reg_date']} END), '%Y-%m-%d') AS '{$constList['n_ada']}', 
@@ -119,7 +134,7 @@ class Attendance extends Model {
                 DATE_FORMAT(MAX(CASE WHEN {$dbInfoSelf['t_name']}.{$dbInfoSelf['absence']} IS NOT NULL THEN {$dbInfoSelf['t_name']}.{$dbInfoSelf['reg_date']} END), '%Y-%m-%d') AS '{$constList['n_absence']}', 
                 COUNT(CASE {$dbInfoLeave['t_name']}.{$dbInfoLeave['early']} WHEN TRUE THEN TRUE END) AS '{$constList['early']}', 
                 DATE_FORMAT(MAX(CASE WHEN {$dbInfoLeave['t_name']}.{$dbInfoLeave['early']} IS TRUE THEN {$dbInfoSelf['t_name']}.{$dbInfoSelf['reg_date']} END), '%Y-%m-%d') AS '{$constList['n_early']}'
-            ");
+            ")
             /* selectRaw("
 	            COUNT(CASE attendances.absence_flag WHEN NOT NULL THEN FALSE ELSE TRUE END) AS 'attendance',
                 MAX(CASE WHEN attendances.absence_flag IS NOT NULL THEN FALSE ELSE attendances.reg_date END) AS 'nearest_attendance',
@@ -130,6 +145,7 @@ class Attendance extends Model {
                 COUNT(CASE leave_schools.early_flag WHEN TRUE THEN TRUE END) AS 'early',
                 MAX(CASE WHEN leave_schools.early_flag IS TRUE THEN attendances.reg_date END) AS 'nearest_early'
             ")*/
+            ->get()->all()[0];
     }
 
     // 클래스 메서드
