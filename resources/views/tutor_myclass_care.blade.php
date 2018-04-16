@@ -106,6 +106,7 @@
                 에게 알림&nbsp;
             </div>
         @empty
+            현재 설정이 없습니다.
         @endforelse
     </div>
 @endsection

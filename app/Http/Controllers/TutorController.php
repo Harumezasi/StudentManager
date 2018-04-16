@@ -313,27 +313,33 @@ class TutorController extends Controller {
             }
         }
 
+
         // 03. 기준에 따른 학생 분류 => 일반 학생
         foreach($studentList as $key => $student) {
+            $std_attendance = $student->selectMyStudentsAttendanceOfToday();
             // 등교 시간이 없을 시 => 결석
             if (is_null($std_attendance['come'])) {
                 $absenceData[] = $std_attendance;
                 unset($studentList[$key]);
+                continue;
 
             // 지각 판별 플래그가 true 일 때 => 지각
             } else if($std_attendance['late_flag']) {
                 $lateData[] = $std_attendance;
                 unset($studentList[$key]);
+                continue;
 
             // 하교 시간이 있을 때 => 하교
             } else if(!is_null($std_attendance['leave'])) {
                 $leaveData[] = $std_attendance;
                 unset($studentList[$key]);
+                continue;
 
             } else {
                 // 아무것도 아니면 => 등교
                 $attendanceData[] = $std_attendance;
                 unset($studentList[$key]);
+                continue;
             }
         }
 

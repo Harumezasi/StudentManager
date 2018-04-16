@@ -443,7 +443,7 @@ class Student extends Model {
     }
 
     // 내 지도학생의 오늘 출석 기록 조회
-    public function selectMyStudentsAttendanceOfToday($argDaysUnit) {
+    public function selectMyStudentsAttendanceOfToday($argDaysUnit = null) {
         // 01. 변수 설정
         $todayAttendance        = $this->selectAttendanceRecordOfToday()->get()[0]->toArray();
         $consecutiveAttendance  = $this->selectConsecutiveAttendanceData($argDaysUnit);
