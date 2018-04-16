@@ -241,69 +241,72 @@ class TutorController extends Controller {
     public function getAttendanceRecordsOfToday() {
         // 01. 데이터 조회
         $professor      = Professor::find(session()->get('user')['info']->id);
-        $attendanceData = $professor->selectMyStudentsAttendanceOfToday();      // 출석자 데이터
-        $lateData       = [];                                                   // 지각자 데이터
-        $absenceData    = [];                                                   // 결석자 데이터
-        $leaveData      = [];                                                   // 하교자 데이터
-        $careData       = [];                                                   // 관심대상 데이터
-        $alertData      = $professor->needCareAlerts()->get()->all();           // 분류 기준 데이터
+        $studentList    = $professor->group()->get()[0]->students()->get()->all();  // 내 학생 리스트
+        $attendanceData = [];                                                       // 출석자 데이터
+        $lateData       = [];                                                       // 지각자 데이터
+        $absenceData    = [];                                                       // 결석자 데이터
+        $leaveData      = [];                                                       // 하교자 데이터
+        $careData       = [];                                                       // 관심대상 데이터
+        $alertData      = $professor->needCareAlerts()->get()->all();               // 분류 기준 데이터
 
         // 02. 기준에 따른 학생 분류 => 관심학생
         foreach($alertData as $alert) {
-            foreach($attendanceData as $key => $student) {
+            foreach($studentList as $key => $student) {
+                $std_attendance = $student->selectMyStudentsAttendanceOfToday($alert->days_unit);
+
                 switch($alert->notification_flag) {
                     case 0: /* 연속 지각 */
                         // 조건 만족이 관심학생 리스트에 추가하고, 사유 입력
                         // 원래 배열에선 삭제
-                        if ($student['consecutive_late'] >= $alert->needed_count) {
-                            $student['reason'] = "연속 지각 {$student['consecutive_late']}회";
-                            $careData[] = $student;
-                            unset($attendanceData[$key]);
+                        if ($std_attendance['consecutive_late'] >= $alert->needed_count) {
+                            $std_attendance['reason'] = "연속 지각 {$std_attendance['consecutive_late']}회";
+                            $careData[] = $std_attendance;
+                            unset($studentList[$key]);
                         }
                         break;
                     case 1: /* 연속 조퇴 */
                         // 조건 만족이 관심학생 리스트에 추가하고, 사유 입력
                         // 원래 배열에선 삭제
-                        if ($student['consecutive_early'] >= $alert->needed_count) {
-                            $student['reason'] = "연속 조퇴 {$student['consecutive_early']}회";
-                            $careData[] = $student;
-                            unset($attendanceData[$key]);
+                        if ($std_attendance['consecutive_early'] >= $alert->needed_count) {
+                            $std_attendance['reason'] = "연속 조퇴 {$std_attendance['consecutive_early']}회";
+                            $careData[] = $std_attendance;
+                            unset($studentList[$key]);
                         }
                         break;
                     case 2: /* 연속 결석 */
                         // 조건 만족이 관심학생 리스트에 추가하고, 사유 입력
                         // 원래 배열에선 삭제
-                        if ($student['consecutive_absence'] >= $alert->needed_count) {
-                            $student['reason'] = "연속 결석 {$student['consecutive_absence']}회";
-                            $careData[] = $student;
-                            unset($attendanceData[$key]);
+                        if ($std_attendance['consecutive_absence'] >= $alert->needed_count) {
+                            $std_attendance['reason'] = "연속 결석 {$std_attendance['consecutive_absence']}회";
+                            $careData[] = $std_attendance;
+                            unset($studentList[$key]);
                         }
                         break;
                     case 3: /* 누적 지각 */
                         // 조건 만족이 관심학생 리스트에 추가하고, 사유 입력
                         // 원래 배열에선 삭제
-                        if ($student['total_late'] >= $alert->needed_count) {
-                            $student['reason'] = "누적 지각 {$student['total_late']}회";
-                            $careData[] = $student;
-                            unset($attendanceData[$key]);
+                        if ($std_attendance['total_late'] >= $alert->needed_count) {
+                            $std_attendance['reason'] = "누적 지각 {$std_attendance['total_late']}회";
+                            $careData[] = $std_attendance;
+                            unset($studentList[$key]);
                         }
                         break;
                     case 4: /* 누적 조퇴 */
                         // 조건 만족이 관심학생 리스트에 추가하고, 사유 입력
                         // 원래 배열에선 삭제
-                        if ($student['total_early'] >= $alert->needed_count) {
-                            $student['reason'] = "누적 조퇴 {$student['total_early']}회";
-                            $careData[] = $student;
-                            unset($attendanceData[$key]);
+                        if ($std_attendance['total_early'] >= $alert->needed_count) {
+                            $std_attendance['reason'] = "누적 조퇴 {$std_attendance['total_early']}회";
+                            $careData[] = $std_attendance;
+                            unset($studentList[$key]);
                         }
                         break;
                     case 5: /* 누적 결석 */
                         // 조건 만족이 관심학생 리스트에 추가하고, 사유 입력
                         // 원래 배열에선 삭제
-                        if ($student['total_absence'] >= $alert->needed_count) {
-                            $student['reason'] = "누적 결석 {$student['total_absence']}회";
-                            $careData[] = $student;
-                            unset($attendanceData[$key]);
+                        if ($std_attendance['total_absence'] >= $alert->needed_count) {
+                            $std_attendance['reason'] = "누적 결석 {$std_attendance['total_absence']}회";
+                            $careData[] = $std_attendance;
+                            unset($studentList[$key]);
                         }
                         break;
                 }
@@ -311,24 +314,27 @@ class TutorController extends Controller {
         }
 
         // 03. 기준에 따른 학생 분류 => 일반 학생
-        foreach($attendanceData as $key => $student) {
+        foreach($studentList as $key => $student) {
             // 등교 시간이 없을 시 => 결석
-            if (is_null($student['come'])) {
-                $absenceData[] = $student;
-                unset($attendanceData[$key]);
+            if (is_null($std_attendance['come'])) {
+                $absenceData[] = $std_attendance;
+                unset($studentList[$key]);
 
             // 지각 판별 플래그가 true 일 때 => 지각
-            } else if($student['late_flag']) {
-                $lateData[] = $student;
-                unset($attendanceData[$key]);
+            } else if($std_attendance['late_flag']) {
+                $lateData[] = $std_attendance;
+                unset($studentList[$key]);
 
             // 하교 시간이 있을 때 => 하교
-            } else if(!is_null($student['leave'])) {
-                $leaveData[] = $student;
-                unset($attendanceData[$key]);
+            } else if(!is_null($std_attendance['leave'])) {
+                $leaveData[] = $std_attendance;
+                unset($studentList[$key]);
 
+            } else {
+                // 아무것도 아니면 => 등교
+                $attendanceData[] = $std_attendance;
+                unset($studentList[$key]);
             }
-            // 아무것도 아니면 => 등교
         }
 
         // View 단에 반환할 데이터 설정
@@ -505,11 +511,13 @@ class TutorController extends Controller {
     // 알림 설정 페이지 출력
     public function viewNeedCareConfig() {
         // 현재 지도교수가 가지고 있는 알림 데이터 확인
-        $profId = session()->get('user')['info']->id;
+        $professor      = Professor::find(session()->get('user')['info']->id);
+        $careAlertList  = $professor->needCareAlerts()->get()->all();
 
         // View 단에 전송할 데이터 추출
         $data = [
-            'title' => '관심학생 알림 설정'
+            'title'         => '관심학생 알림 설정',
+            'alert_list'    => $careAlertList
         ];
 
         return view('tutor_myclass_care', $data);

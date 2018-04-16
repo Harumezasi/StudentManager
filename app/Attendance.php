@@ -153,8 +153,14 @@ class Attendance extends Model {
         // 01. 학생 조회
         $student = Student::findOrFail($argStdId);
 
-        return self::where('std_id', $student->id)
-            ->orderBy('reg_date', 'desc')->limit(1)->get()->all()[0];
+        $data = self::where('std_id', $student->id);
+
+        if(sizeof($data->get()->all()) <= 0) {
+            return null;
+        } else {
+            return $data->orderBy('reg_date', 'desc')->limit(1)->get()->all()[0];
+        }
+
     }
 
     // 출석 데이터 생성

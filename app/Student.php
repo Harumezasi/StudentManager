@@ -282,12 +282,26 @@ class Student extends Model {
     }
 
     // 누적 지각/결석/조퇴 데이터 조회
-    public function selectConsecutiveAttendanceData() {
+    public function selectConsecutiveAttendanceData($argDaysUnit = null) {
         // 출석 테이블 조인 결과
-        $joinResult = $this->attendances()
-            ->join('come_schools', 'attendances.come_school', 'come_schools.id')
-            ->leftJoin('leave_schools', 'attendances.leave_school', 'leave_schools.id')
-            ->orderBy('attendances.reg_date', 'desc');
+        // 관측 일자를 지정하지 않았을 때
+        $joinResult = 0;
+        if(is_null($argDaysUnit)) {
+            $joinResult = $this->attendances()
+                ->join('come_schools', 'attendances.come_school', 'come_schools.id')
+                ->leftJoin('leave_schools', 'attendances.leave_school', 'leave_schools.id')
+                ->orderBy('attendances.reg_date', 'desc');
+        } else {
+            // 관측 일자를 지정했을 때
+            $endDate = today()->format('Y-m-d');
+            $startDate = today()->subDays($argDaysUnit)->format('Y-m-d');
+
+            $joinResult = $this->attendances()
+                ->where([['reg_date', '>', "{$startDate}"], ['reg_date', '<=', "{$endDate}"]])
+                ->join('come_schools', 'attendances.come_school', 'come_schools.id')
+                ->leftJoin('leave_schools', 'attendances.leave_school', 'leave_schools.id')
+                ->orderBy('attendances.reg_date', 'desc');
+        }
 
         // 데이터 조회 : 연속 지각횟수, 연속 결석횟수, 연속 조퇴횟수
         // 실제 반영 데이터
@@ -349,12 +363,27 @@ class Student extends Model {
 
 
     // 최근의 출석 데이터를 조회
-    public function selectRecentlyAttendanceRecords() {
+    public function selectRecentlyAttendanceRecords($argDaysUnit = null) {
         // 데이터 조회 : 총 출석일, 총 지각횟수, 총 결석횟수, 총 조퇴횟수, 최근 등교&하교 시각,
         //                  최근 지각 일자, 최근 결석일자, 최근 조퇴일자
-        $queryResult = $this->attendances()
-            ->join('come_schools', 'attendances.come_school', 'come_schools.id')
-            ->leftJoin('leave_schools', 'attendances.leave_school', 'leave_schools.id')
+        $joinResult = null;
+        // 관측 일자가 없을 때
+        if(is_null($argDaysUnit)) {
+            $joinResult = $this->attendances()
+                ->join('come_schools', 'attendances.come_school', 'come_schools.id')
+                ->leftJoin('leave_schools', 'attendances.leave_school', 'leave_schools.id');
+        } else {
+            $endDate = today()->format('Y-m-d');
+            $startDate = today()->subDays($argDaysUnit)->format('Y-m-d');
+
+            // 관측 일자가 있을 때
+            $joinResult = $this->attendances()
+                ->where([['reg_date', '>', "{$startDate}"], ['reg_date', '<=', "{$endDate}"]])
+                ->join('come_schools', 'attendances.come_school', 'come_schools.id')
+                ->leftJoin('leave_schools', 'attendances.leave_school', 'leave_schools.id');
+        }
+
+        $queryResult = $joinResult
             ->select(
             // 총 출석 횟수
             DB::raw("(COUNT('attendances.id') - 
@@ -411,5 +440,35 @@ class Student extends Model {
                 'students.id', 'students.name', 'come_schools.reg_time AS come', 'leave_schools.reg_time AS leave',
                 'come_schools.lateness_flag', 'leave_schools.early_flag', 'attendances.absence_flag'
             );
+    }
+
+    // 내 지도학생의 오늘 출석 기록 조회
+    public function selectMyStudentsAttendanceOfToday($argDaysUnit) {
+        // 01. 변수 설정
+        $todayAttendance        = $this->selectAttendanceRecordOfToday()->get()[0]->toArray();
+        $consecutiveAttendance  = $this->selectConsecutiveAttendanceData($argDaysUnit);
+        $totalAttendance        = $this->selectRecentlyAttendanceRecords($argDaysUnit);
+
+        return [
+            // 학생 정보
+            'id'                    => $todayAttendance['id'],
+            'name'                  => $todayAttendance['name'],
+
+            // 오늘자 등교 정보
+            'come'                  => $todayAttendance['come'],
+            'leave'                 => $todayAttendance['leave'],
+            'late_flag'             => $todayAttendance['lateness_flag'],
+            'absence_flag'          => $todayAttendance['absence_flag'],
+
+            // 연속 출석기록
+            'consecutive_late'      => $consecutiveAttendance['consecutive_late'],
+            'consecutive_absence'   => $consecutiveAttendance['consecutive_absence'],
+            'consecutive_early'     => $consecutiveAttendance['consecutive_early'],
+
+            // 누적 출석기록
+            'total_late'            => $totalAttendance['total_late'],
+            'total_absence'         => $totalAttendance['total_absence'],
+            'total_early'           => $totalAttendance['total_early']
+        ];
     }
 }

@@ -7,6 +7,13 @@
  */
 ?>
 @extends('layouts.tutor_master')
+@section('style')
+    <style type="text/css">
+        div .student_element {
+            border: 1px solid black;
+        }
+    </style>
+@endsection
 @section('body.section')
     <h2>등・하교 출결</h2>
 
@@ -27,9 +34,11 @@
             <tbody>
                 <tr>
                     <!-- 등교 학생 -->
-                    <td border="1">
+                    <td>
                         @forelse($attendance_data as $student)
-                            <div border="1">{{ "학번:{$student['id']}, 이름: {$student['name']}, 등교시각: {$student['come']}" }}</div>
+                            <div>
+                                {{ "학번:{$student['id']}, 이름: {$student['name']}, 등교시각: {$student['come']}" }}
+                            </div>
                         @empty
                             조회된 데이터가 없습니다.
                         @endforelse
@@ -37,7 +46,11 @@
                     <!-- 하교 학생 -->
                     <td>
                         @forelse($leave_data as $student)
-                            <div border="1">{{ "학번:{$student['id']}, 이름: {$student['name']}, 하교시각: {$student['leave']}" }}</div>
+                            <div
+                                @if($student['leave'])
+                                @endif>
+                                {{ "학번:{$student['id']}, 이름: {$student['name']}, 하교시각: {$student['leave']}" }}
+                            </div>
                         @empty
                             조회된 데이터가 없습니다.
                         @endforelse
@@ -45,7 +58,9 @@
                     <!-- 결석 학생 -->
                     <td>
                         @forelse($absence_data as $student)
-                            <div border="1">{{ "학번:{$student['id']}, 이름: {$student['name']}" }}</div>
+                            <div>
+                                {{ "학번:{$student['id']}, 이름: {$student['name']}" }}
+                            </div>
                         @empty
                             조회된 데이터가 없습니다.
                         @endforelse

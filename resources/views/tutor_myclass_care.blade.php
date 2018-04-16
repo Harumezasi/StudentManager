@@ -50,12 +50,63 @@
             </form>
         </span>
     </div>
+    <hr>
     <!-- 알림 확인 -->
     <div>
-        <h2>알림 설정</h2>
-        <select name="days_unit">
-
-        </select>
+        <h2>알림 확인</h2>
+        @forelse($alert_list as $alert)
+            <div>
+                @switch($alert->days_unit)
+                    @case(7)
+                        일주일
+                    @break
+                    @case(30)
+                        한 달
+                    @break
+                    @default
+                        {{ $alert->days_unit }}일
+                    @break
+                @endswitch
+                동안&nbsp;
+                @switch($alert->notification_flag)
+                    @case(0)
+                    @case(3)
+                    지각
+                    @break
+                    @case(1)
+                    @case(4)
+                    조퇴
+                    @break
+                    @case(2)
+                    @case(5)
+                    결석
+                    @break;
+                @endswitch
+                을&nbsp;
+                @switch($alert->notification_flag)
+                    @case(0)
+                    @case(1)
+                    @case(2)
+                        연속 {{$alert->needed_count}}
+                    @break
+                    @case(3)
+                    @case(4)
+                    @case(5)
+                        누적 {{$alert->needed_count}}
+                    @break;
+                @endswitch
+                회 이상 할 경우&nbsp;
+                @if($alert->alert_prof_flag && !$alert->alert_std_flag)
+                    나
+                @elseif($alert->alert_prof_flag && $alert->alert_std_flag)
+                    나와 학생
+                @elseif(!$alert->alert_prof_flag && $alert->alert_std_flag)
+                    학생
+                @endif
+                에게 알림&nbsp;
+            </div>
+        @empty
+        @endforelse
     </div>
 @endsection
 @section('script')

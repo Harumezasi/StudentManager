@@ -149,28 +149,30 @@ class AttendanceController extends Controller {
         // 현재 등교여부 검증 => 최근 등교 데이터가 등교 is not null and 하교 is null 일 경우 현재 등교 중
         $recent_attd = Attendance::selectRecentlyAttendanceRecords($student->id);
 
-        // 등교 일자가 오늘이라면 => 함수 종료
-        if($recent_attd->reg_date == today()->format('Y-m-d')) {
-            return new ResponseObject(
-                  "false",
-                  "오늘 등교하셨습니다."
-            );
-        }
-
-        // 등교 데이터가 null이 아닐 때
-        if(!is_null($recent_attd->come_school)) {
-            // 하교 데이터가 null일 때
-            if(is_null($recent_attd->leave_school)) {
-                // => 지난 번에 등교하고 하교를 하지 않음 => 하교 하라는 메시지 출력
+        if(!is_null($recent_attd)) {
+            // 등교 일자가 오늘이라면 => 함수 종료
+            if ($recent_attd->reg_date == today()->format('Y-m-d')) {
                 return new ResponseObject(
-                    'false',
-                    '하교를 하지 않으셨습니다. 하교를 먼저 해주세요.'
+                    "false",
+                    "오늘 등교하셨습니다."
                 );
+            }
+
+            // 등교 데이터가 null이 아닐 때
+            if (!is_null($recent_attd->come_school)) {
+                // 하교 데이터가 null일 때
+                if (is_null($recent_attd->leave_school)) {
+                    // => 지난 번에 등교하고 하교를 하지 않음 => 하교 하라는 메시지 출력
+                    return new ResponseObject(
+                        'false',
+                        '하교를 하지 않으셨습니다. 하교를 먼저 해주세요.'
+                    );
+                }
             }
         }
 
         // 출석 데이터 생성
-        if(Attendance::insertAttendance($student->id) === false) {
+        if (Attendance::insertAttendance($student->id) === false) {
             return new ResponseObject(
                 'false',
                 '데이터 생성 실패'
