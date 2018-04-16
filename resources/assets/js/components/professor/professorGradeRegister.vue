@@ -49,7 +49,7 @@
                     </v-card-title>
                     <v-flex d-flex xs12 sm6 md4>
                     <!-- form 양식 -->
-                    <v-form action='/professor/scores/store/excel/export' method='post'>
+                    <v-form action='/professor/scores/store/excel/export' method='post' enctype='multipart/form-data'>
                       <!-- <input type="hidden" name="_token" :value="csrf"> -->
                       <!-- 파일 이름 입력 -->
                       <v-chip color="secondary" text-color="white">파일 이름</v-chip>
@@ -100,16 +100,11 @@
                     </v-card-title>
                     <v-flex d-flex xs12 sm6 md4>
                     <!-- form 양식 -->
-                    <v-form action='/professor/scores/store/excel/import' method='post' enctype='multipart/form-data'>
-                      <!-- <input type="hidden" name="_token" :value="csrf"> -->
                       <!-- 파일 등록 -->
                       <v-chip color="secondary" text-color="white">파일등록</v-chip>
-                      <input type="file" name="upload_file" id="upload_file" required="" accept=".xlsx, .xls, .csv">
-                      <!-- SUBMIT 실행 버튼 영역 -->
-                      <v-btn color="indigo" type='submit'>성적 업로드</v-btn>
-                      <!-- END -->
-                    </v-form>
-                    <!-- form End-->
+                      <input type="file" id="file" ref='upload_file' required="" accept=".xlsx, .xls, .csv" v-on:change="handleFileUpload()">
+                      <button v-on:click="submitFile()">성적 업로드</button>
+
                     </v-flex>
                       <v-card-actions>
                         <v-spacer></v-spacer>
@@ -146,18 +141,41 @@
 </template>
 <script>
 export default {
-  data() {
-    return {
-      dialog1: false,
-      dialog2: false,
-      //csrf: ""
+    data(){
+      return {
+        file: null,
+        dialog1: false,
+        dialog2: false
+      }
+    },
+    methods: {
+      submitFile(){
+            let formData = new FormData();
+            formData.append('upload_file', this.file);
+            axios.post( '/professor/scores/store/excel/import',
+                formData,
+                {
+                  headers: {
+                      'Content-Type': 'multipart/form-data'
+                    }
+                }
+            ).then((response)=>{
+              console.log(response);
+            })
+            .catch(function(){
+              console.log('FAILURE!!');
+            });
+      },
+      handleFileUpload(){
+        this.file = this.$refs.upload_file.files[0];
+      }
     }
-  },
-  mounted() {
-      //this.csrf = window.laravel.csrfToken;
   }
-}
+
 </script>
+
+
+
 <style>
 .contents {
   text-align: center;

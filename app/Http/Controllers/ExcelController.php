@@ -152,7 +152,7 @@ class ExcelController extends Controller {
         if($score->insertScoreList($score, $extractData['std_list'])) {
             flash()->success('성적 등록에 성공하였습니다.');
 
-            return back();
+            //return back();
         } else {
             throw new NotAccessibleException('데이터 등록에 실패하였습니다.');
         }

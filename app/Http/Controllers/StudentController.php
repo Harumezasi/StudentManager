@@ -346,11 +346,8 @@ class StudentController extends Controller {
         $reqPeriod  = $request->post('period');
         $reqDate    = $request->post('date');
 
-
         $attendanceData =
             app('App\Http\Controllers\AttendanceController')->getAttendanceRecords($std_id, $reqPeriod, $reqDate);
-
-
 
         // 해당 기간동안 출석 데이터가 없을 경우
         $periodData = [];
@@ -402,7 +399,7 @@ class StudentController extends Controller {
         ];
 
         //return view('student_attendance', $data);
-        return response()->json($data, 200);
+        return response()->json(new ResponseObject(true, $data), 200);
     }
 
     // 모바일 : 출석율 그래프 그리기
@@ -565,6 +562,58 @@ class StudentController extends Controller {
         ];
 
         return view('student_lecture', $data);
+    }
+
+
+    // 모바일 : 과목 정보 불러오기
+    public function getLectureDataAtMobile(Request $request) {
+        // 유효성 검사
+        $validator = Validator::make($request->all(), [
+            'stdId'     => 'required',
+            'term'      => 'regex:/^[1-2][0-9]\d{2}-[1-4]$/'
+        ]);
+
+        if($validator->fails()) {
+            return response()->json(new ResponseObject(
+                false, "데이터 수신에 실패헸습니다."
+            ), 200);
+        }
+
+        //
+        $reqTerm        = $request->exists('term') ? $request->post('term') : null;
+        $term           = $this->getTermValue($reqTerm);
+        $thisTerm       = $term['this_term'];
+        $prevTerm       = $term['prev_term'];
+        $nextTerm       = $term['next_term'];
+        $stdId          = $request->post('stdId');
+
+        // 02. 학기 정보 설정
+        $term_info  = explode('-', $thisTerm);
+        $year       = $term_info[0];
+        $term       = $term_info[1];
+
+        // 03. 학업 데이터 추출
+        $dataList       =
+            app('App\Http\Controllers\StudyController')->getStudyAchievementList($stdId, $year, $term);
+
+        // 사진 URL 가공
+        foreach($dataList as $data) {
+            $data['prof_info']['face_photo'] = strlen($data['prof_info']['face_photo']) > 0 ?
+                url("/source/prof_face/{$data['prof_info']['face_photo']}") : url('/source/prof_face/default.png');
+        }
+
+        // 04. View 단에 전송할 데이터
+        $term = __('lecture.'.ConstantEnum::TERM[$term]);
+        $data = [
+            //'title'             => __('page_title.student_lecture'),
+            'lecture_list'      => $dataList,
+            'year'              => $year,
+            'term'              => $term,
+            'prev_term'         => $prevTerm,
+            'next_term'         => $nextTerm
+        ];
+
+        return response()->json(new ResponseObject(true, $data), 200);
     }
 
     // 03-04. 상담관리

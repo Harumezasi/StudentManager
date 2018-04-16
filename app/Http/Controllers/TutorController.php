@@ -12,6 +12,7 @@ use App\Http\Controllers\ConstantEnum;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Facade;
 use PHPUnit\Util\RegularExpression;
+use Validator;
 
 /**
  * 클래스명:                       TutorController
@@ -356,7 +357,28 @@ class TutorController extends Controller {
         ];
 
         /*return view('tutor_myclass_attendance', $data);*/
-        return $data;
+        return response()->json($data, 200);
+    }
+
+    // 모바일: 오늘자 학생 출결기록 조회
+    public function getAttendanceRecordsOfTodayAtMobile(Request $request) {
+        // 유효성 검사
+        $validator = Validator::make($request->all(), [
+            'id'            => 'required'
+        ]);
+
+        if($validator->fails()) {
+            return response()->json(new ResponseObject(
+                false, "데이터 수신에 실패헸습니다."
+            ), 200);
+        }
+
+        // 출석 데이터 획득
+        //$professor = Professor::find()
+
+
+        return response()->json(new ResponseObject(
+        ), 200);
     }
 
     /**
@@ -391,19 +413,21 @@ class TutorController extends Controller {
 
     // 모바일 => 내 학생 리스트 가져오기
     public function getMyStudentsListAtAndroid(Request $request) {
-        // 데이터 획득
-        $profId = session()->get('user')['info']->id;
-        $orderStyle = $request->exists('order_style') ? $request->post('order_style') : 'id';
-        switch(strtolower($orderStyle)) {
-            case 'id':
-            case 'name':
-                break;
-            default:
-                return response()->json(new ResponseObject(
-                        "FALSE", "잘못된 정렬 방식입니다."
-                    ), 200
-                );
+        // 유효성 검사
+        $validator = Validator::make($request->all(), [
+            'id'            => 'required|exists:professors,id',
+            'order_style'   => 'in:id,name'
+        ]);
+
+        if($validator->fails()) {
+            return response()->json(new ResponseObject(
+                false, "데이터 수신에 실패헸습니다."
+            ), 200);
         }
+
+        // 데이터 획득
+        $profId = $request->post('id');
+        $orderStyle = $request->exists('order_style') ? $request->post('order_style') : 'id';
 
         $queryList = Professor::find($profId)->selectStudentsOfMyClass($orderStyle);
 
@@ -421,7 +445,11 @@ class TutorController extends Controller {
             ];
         }
 
-        return response()->json($studentsList, 200);
+        $group_name = Professor::find($profId)->group()->get()[0]->name;
+
+        return response()->json(new ResponseObject(
+            true, ['class_name' => $group_name, 'student_list' => $studentsList]
+            ), 200);
     }
 
     // 내 학생 상세정보 출력 - 출결 확인

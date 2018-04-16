@@ -91,6 +91,9 @@ Route::name('student.')->group(function() {
         // 모바일: 출결 기록 조회
         Route::post('/mobile/attendance', 'StudentController@getAttendanceRecordsAtMobile');
 
+        // 모바일: 학생의 과목 정보 조회
+        Route::post('/mobile/lecture', 'StudentController@getLectureDataAtMobile');
+
         // 학생 계정 접속 이후 사용하는 기능들 => 로그인 여부 확인
         Route::middleware(['check.login'])->group(function() {
 
@@ -140,7 +143,7 @@ Route::name('student.')->group(function() {
             ]);
             */
             // 학업 관리 기능
-            Route::get('/lecture/{date?}', [
+            Route::get('/lecture', [
                 'as'    => 'lecture',
                 'uses'  => 'StudentController@lectureMain'
             ]);
@@ -170,6 +173,9 @@ Route::name('tutor.')->group(function() {
             'as'    => 'check_join',
             'uses'  => 'TutorController@check_join'
         ]);
+
+        // 모바일 - 내 지도반 학생 리스트 출력
+        Route::post('/myclass/student_list', 'TutorController@getMyStudentsListAtAndroid');
 
         // 지도교수 로그인 이후 이용 가능 기능
         Route::middleware(['check.login'])->group(function() {
@@ -220,8 +226,6 @@ Route::name('tutor.')->group(function() {
                 'uses'  => 'TutorController@getAttendanceRecordsOfToday'
             ]);
 
-            // 모바일 - 내 지도반 학생 리스트 출력
-            Route::post('/myclass/student_list', 'TutorController@getMyStudentsListAtAndroid');
 
             // 학생 상세정보 => 출결 확인
             Route::get('/details/attendance/{std_id}/{period?}/{date?}', [
