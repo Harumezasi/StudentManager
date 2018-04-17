@@ -98,24 +98,45 @@
                     <v-card-title>
                       <span class="headline">엑셀로 성적 업로드</span>
                     </v-card-title>
-                    <v-flex d-flex xs12 sm6 md4>
+                    <div>
                     <!-- form 양식 -->
                       <!-- 파일 등록 -->
                       <v-chip color="secondary" text-color="white">파일등록</v-chip>
-                      <input type="file" id="file" ref='upload_file' required="" accept=".xlsx, .xls, .csv" v-on:change="handleFileUpload()">
-                      <button v-on:click="submitFile()">성적 업로드</button>
-
-                    </v-flex>
+                      <input type="file" id="file" ref='upload_file' required="" accept=".xlsx, .xls, .csv" v-on:change="handleFileUpload()" class="upload_input">
+                      <button v-on:click="submitFile()" class="upload_button">성적 업로드</button>
+                    </div>
                       <v-card-actions>
                         <v-spacer></v-spacer>
-                        <v-btn color="blue darken-1" flat @click.native="dialog2 = false">Close</v-btn>
+                        <v-btn color="blue darken-1" flat @click="dialog2=false">Close</v-btn>
                       </v-card-actions>
                     </v-card>
                 </v-dialog>
                 <!-- 버튼 영역 끝 -->
               </v-card>
             </v-flex>
-
+            <!-- 완료 메시지 모달창 -->
+            <v-dialog v-model="dialog3" persistent max-width="600px">
+              <!-- 모달창 메인 -->
+              <v-card>
+                <v-card-title>
+                  <span class="headline">알림</span>
+                </v-card-title>
+                <v-flex d-flex xs12 sm6 md4>
+                <!-- form 양식 -->
+                <div v-if="reData">
+                  성적 업로드에 성공하였습니다.
+                </div>
+                <div v-else>
+                  성적 업로드에 실패하였습니다.
+                </div>
+                <!-- form End-->
+                </v-flex>
+                  <v-card-actions>
+                    <v-spacer></v-spacer>
+                    <v-btn color="blue darken-1" flat @click="dialog3=false, dialog2=false">Close</v-btn>
+                  </v-card-actions>
+                </v-card>
+            </v-dialog>
             <!-- 성적 직접 입력 부분 -->
             <v-flex xs12 md3>
               <v-card class="elevation-0 transparent">
@@ -145,7 +166,9 @@ export default {
       return {
         file: null,
         dialog1: false,
-        dialog2: false
+        dialog2: false,
+        dialog3: false,
+        reData : true
       }
     },
     methods: {
@@ -160,14 +183,22 @@ export default {
                     }
                 }
             ).then((response)=>{
-              console.log(response);
+              this.reData = true;
+              this.openWindow();
+              console.log(response.data);
             })
-            .catch(function(){
+            .catch((error)=>{
               console.log('FAILURE!!');
+              this.reData = false;
+              this.openWindow();
+              console.log(response.data);
             });
       },
       handleFileUpload(){
         this.file = this.$refs.upload_file.files[0];
+      },
+      openWindow(){
+        this.dialog3 = true;
       }
     }
   }
@@ -177,6 +208,21 @@ export default {
 
 
 <style>
+.upload_input {
+    border: 1px solid black;
+    width : 300px;
+}
+
+.upload_button {
+    border: 1px solid black;
+    width: 100px;
+    height: 50px;
+    border-radius: 10px;
+    background-color: gray;
+    font-weight: bold;
+    font-size: 15px;
+}
+
 .contents {
   text-align: center;
 }

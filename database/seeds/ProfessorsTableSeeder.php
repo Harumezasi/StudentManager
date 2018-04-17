@@ -22,7 +22,7 @@ class ProfessorsTableSeeder extends Seeder
         $tutor->phone       = "0539405765";
         $tutor->email       = 'ycjung@yjc.ac.kr';
         $tutor->office      = "본관 326호";
-        $tutor->face_photo  = "ycjung.jpg";
+        $tutor->face_photo  = "/source/prof_face/ycjung.jpg";
 
         $tutor->save();
 
@@ -33,35 +33,35 @@ class ProfessorsTableSeeder extends Seeder
                    'phone'          => '0539405309',
                    'email'          => 'seohk17@yjc.ac.kr',
                    'office'         => '본관 323호',
-                   'face_photo'     => 'hkseo.jpg'
+                   'face_photo'     => '/source/prof_face/hkseo.jpg'
                ],
                 'prof2'      => [
                     'name'           => '김종율',
                     'phone'          => '0539405301',
                     'email'          => 'xmaskjr@yjc.ac.kr',
                     'office'         => '본관 326호',
-                    'face_photo'     => 'jykim.jpg'
+                    'face_photo'     => '/source/prof_face/jykim.jpg'
                 ],
                 'prof3'      => [
                     'name'           => '기쿠치',
                     'phone'          => '0539405318',
                     'email'          => 'figures@yjc.ac.kr',
                     'office'         => '본관 427호',
-                    'face_photo'     => 'kikuti.jpg'
+                    'face_photo'     => '/source/prof_face/kikuti.jpg'
                 ],
                 'prof4'      => [
                     'name'           => '김기종',
                     'phone'          => '0539405310',
                     'email'          => 'kjkim@yjc.ac.kr',
                     'office'         => '본관 309호',
-                    'face_photo'     => 'kjkim.jpg'
+                    'face_photo'     => '/source/prof_face/kjkim.jpg'
                 ],
                 'prof5'      => [
                     'name'           => '박성철',
                     'phone'          => '0539405307',
                     'email'          => 'scpark@yjc.ac.kr',
                     'office'         => '본관 322호',
-                    'face_photo'     => 'scpack.jpg'
+                    'face_photo'     => '/source/prof_face/scpack.jpg'
                 ],
         ];
 

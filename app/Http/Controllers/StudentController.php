@@ -571,7 +571,7 @@ class StudentController extends Controller {
             'next_term'         => $nextTerm
         ];
 
-        return view('student_lecture', $data);
+        return $data;
     }
 
 

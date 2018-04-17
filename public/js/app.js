@@ -31788,29 +31788,111 @@ __WEBPACK_IMPORTED_MODULE_0_vue___default.a.component('doughnut-chart', {
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 
 /*-- 학기 ㄷㅔ이터 --*/
 /* harmony default export */ __webpack_exports__["a"] = ({
   data: function data() {
     return {
       e1: null,
-      semester: [{
-        text: '2016년 1학기'
-      }, {
-        text: '2016년 2학기'
-      }, {
-        text: '2017년 1학기'
-      }, {
-        text: '2017년 2학기'
-      }, {
-        text: '2018년 1학기'
-      }],
-      /*-- 학업 테이블 영역 --*/
-      fields: ['종류', '횟수', '취득가능점수', '취득점수', '평균', '반영 비율'],
-      grade: [{ 종류: '중간', 횟수: 0, 취득가능점수: 0, 취득점수: 0, 평균: 0, 반영비율: '35%' }, { 종류: '기말', 횟수: 0, 취득가능점수: 0, 취득점수: 0, 평균: 0, 반영비율: '35%' }, { 종류: '과제', 횟수: 0, 취득가능점수: 0, 취득점수: 0, 평균: 0, 반영비율: '35%' }, { 종류: '쪽지', 횟수: 0, 취득가능점수: 0, 취득점수: 0, 평균: 0, 반영비율: '35%' }],
+      days: {
+        year: null,
+        term: null
+      },
+      fields: {
+        type: 'test '
+      },
+      gradeType: {
+        t1: "",
+        t2: "횟수",
+        t3: "만점",
+        t4: "득점",
+        t5: "평균",
+        t6: "반영비율"
+      },
+      plusType: {
+        t1: "날짜",
+        t2: "타입",
+        t3: "상세",
+        t4: "득점",
+        t5: "만점"
+      },
+      gradeData: null,
       /*-- 테이블 선 나오게 함 --*/
       bordered: true
     };
+  },
+  mounted: function mounted() {
+    this.getData();
+  },
+
+  methods: {
+    getData: function getData() {
+      var _this = this;
+
+      axios.get('/student/getData/gradeManagement').then(function (response) {
+        /* 년도, 학기 */
+        _this.days.year = response.data.year;
+        _this.days.term = response.data.term;
+        _this.gradeData = response.data.lecture_list;
+        console.log(_this.gradeData);
+      });
+    }
   }
 });
 
@@ -32435,18 +32517,43 @@ __WEBPACK_IMPORTED_MODULE_0_vue___default.a.component('doughnut-chart', {
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 
 /* harmony default export */ __webpack_exports__["a"] = ({
   data: function data() {
     return {
       file: null,
       dialog1: false,
-      dialog2: false
+      dialog2: false,
+      dialog3: false,
+      reData: true
     };
   },
 
   methods: {
     submitFile: function submitFile() {
+      var _this = this;
+
       var formData = new FormData();
       formData.append('upload_file', this.file);
       axios.post('/professor/scores/store/excel/import', formData, {
@@ -32454,13 +32561,21 @@ __WEBPACK_IMPORTED_MODULE_0_vue___default.a.component('doughnut-chart', {
           'Content-Type': 'multipart/form-data'
         }
       }).then(function (response) {
-        console.log(response);
-      }).catch(function () {
+        _this.reData = true;
+        _this.openWindow();
+        console.log(response.data);
+      }).catch(function (error) {
         console.log('FAILURE!!');
+        _this.reData = false;
+        _this.openWindow();
+        console.log(response.data);
       });
     },
     handleFileUpload: function handleFileUpload() {
       this.file = this.$refs.upload_file.files[0];
+    },
+    openWindow: function openWindow() {
+      this.dialog3 = true;
     }
   }
 });
@@ -69936,7 +70051,7 @@ exports = module.exports = __webpack_require__(5)(false);
 
 
 // module
-exports.push([module.i, "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n", ""]);
+exports.push([module.i, "\n.studentInfoArea{\r\n  display: inline-block;\r\n  margin : 10px;\n}\n.studentInfoArea button {\r\n  width : 100px;\r\n  height: 50px;\r\n  background-color: cyan;\r\n  border: 1px solid black;\r\n  margin : 10px;\r\n  font-size: 15px;\r\n  font-weight: bold;\n}\n.gradeDataTable {\r\n    width : 600px;\r\n    height: 300px;\n}\n.gradeDataTablePlus {\r\n    width : 600px;\r\n    height: 200px;\n}\ntable {\r\n  text-align: center;\r\n  border: 1px solid black;\r\n  border-radius: 10px;\r\n  font-size: 15px;\r\n  font-weight: bold;\n}\ntd {\r\n  border: 1px solid black;\n}\r\n", ""]);
 
 // exports
 
@@ -69989,60 +70104,113 @@ var render = function() {
             "v-layout",
             { attrs: { column: "", "align-center": "" } },
             [
+              _c("v-flex", { attrs: { xs12: "" } }, [
+                _c("div", { staticClass: "termArea" }, [
+                  _vm._v(
+                    "\r\n              " +
+                      _vm._s(_vm.days.year) +
+                      "년도 " +
+                      _vm._s(_vm.days.term) +
+                      "\r\n            "
+                  )
+                ])
+              ]),
+              _vm._v(" "),
               _c(
                 "v-flex",
                 { attrs: { xs12: "" } },
-                [
-                  _c("v-data-table", {
-                    staticClass: "elevation-0",
-                    attrs: {
-                      headers: _vm.headers,
-                      items: _vm.attendanceData,
-                      "hide-actions": ""
-                    },
-                    scopedSlots: _vm._u([
-                      {
-                        key: "items",
-                        fn: function(props) {
-                          return [
-                            _c("td", { staticClass: "text-xs-center" }, [
-                              _vm._v(_vm._s(props.item.attendance))
+                _vm._l(_vm.gradeData, function(datas) {
+                  return _c(
+                    "div",
+                    { key: datas.key, staticClass: "studentInfoArea" },
+                    [
+                      _c("table", { staticClass: "gradeDataTable" }, [
+                        _c(
+                          "tr",
+                          [
+                            _c("td", { attrs: { rowspan: "5" } }, [
+                              _c("img", {
+                                attrs: { src: datas.prof_info.face_photo }
+                              })
                             ]),
                             _vm._v(" "),
-                            _c("td", { staticClass: "text-xs-center" }, [
-                              _vm._v(_vm._s(props.item.nearest_attendance))
-                            ]),
+                            _vm._l(_vm.gradeType, function(types) {
+                              return _c("td", [_vm._v(_vm._s(types))])
+                            })
+                          ],
+                          2
+                        ),
+                        _vm._v(" "),
+                        _c(
+                          "tr",
+                          _vm._l(datas.score[1], function(scores1) {
+                            return _c("td", [_vm._v(_vm._s(scores1))])
+                          })
+                        ),
+                        _vm._v(" "),
+                        _c(
+                          "tr",
+                          _vm._l(datas.score[2], function(scores1) {
+                            return _c("td", [_vm._v(_vm._s(scores1))])
+                          })
+                        ),
+                        _vm._v(" "),
+                        _c(
+                          "tr",
+                          _vm._l(datas.score[3], function(scores1) {
+                            return _c("td", [_vm._v(_vm._s(scores1))])
+                          })
+                        ),
+                        _vm._v(" "),
+                        _c(
+                          "tr",
+                          _vm._l(datas.score[4], function(scores1) {
+                            return _c("td", [_vm._v(_vm._s(scores1))])
+                          })
+                        ),
+                        _vm._v(" "),
+                        _c("tr", [
+                          _c("td", [_vm._v(" " + _vm._s(datas.title) + " ")]),
+                          _vm._v(" "),
+                          _c("td", { attrs: { colspan: "6" } }, [
+                            _vm._v(
+                              " 학업성취도 : " +
+                                _vm._s(datas.achievement) +
+                                " %"
+                            )
+                          ])
+                        ])
+                      ]),
+                      _vm._v(" "),
+                      _c("button", [_vm._v("상세보기")]),
+                      _vm._v(" "),
+                      _c("div", [
+                        _c(
+                          "table",
+                          { staticClass: "gradeDataTablePlus" },
+                          [
+                            _c(
+                              "tr",
+                              _vm._l(_vm.plusType, function(type) {
+                                return _c("td", [_vm._v(_vm._s(type))])
+                              })
+                            ),
                             _vm._v(" "),
-                            _c("td", { staticClass: "text-xs-center" }, [
-                              _vm._v(_vm._s(props.item.late))
-                            ]),
-                            _vm._v(" "),
-                            _c("td", { staticClass: "text-xs-center" }, [
-                              _vm._v(_vm._s(props.item.nearest_late))
-                            ]),
-                            _vm._v(" "),
-                            _c("td", { staticClass: "text-xs-center" }, [
-                              _vm._v(_vm._s(props.item.absence))
-                            ]),
-                            _vm._v(" "),
-                            _c("td", { staticClass: "text-xs-center" }, [
-                              _vm._v(_vm._s(props.item.nearest_absence))
-                            ]),
-                            _vm._v(" "),
-                            _c("td", { staticClass: "text-xs-center" }, [
-                              _vm._v(_vm._s(props.item.early))
-                            ]),
-                            _vm._v(" "),
-                            _c("td", { staticClass: "text-xs-center" }, [
-                              _vm._v(_vm._s(props.item.nearest_early))
-                            ])
-                          ]
-                        }
-                      }
-                    ])
-                  })
-                ],
-                1
+                            _vm._l(datas.gained_score, function(gainedData) {
+                              return _c(
+                                "tr",
+                                _vm._l(gainedData, function(datas) {
+                                  return _c("td", [_vm._v(_vm._s(datas))])
+                                })
+                              )
+                            })
+                          ],
+                          2
+                        )
+                      ])
+                    ]
+                  )
+                })
               )
             ],
             1
@@ -71400,7 +71568,7 @@ exports = module.exports = __webpack_require__(5)(false);
 
 
 // module
-exports.push([module.i, "\n.contents {\r\n  text-align: center;\n}\n.attendanceCheckTitleEng {\r\n  color: white;\r\n  font-family: inherit;\n}\n.attendanceCheckTitleJap {\r\n  color: rgb(0, 0, 0);\r\n  font-size: 20px;\r\n  font-family: MS Gothic;\n}\n.custom-loader {\r\n  -webkit-animation: loader 1s infinite;\r\n          animation: loader 1s infinite;\r\n  display: -webkit-box;\r\n  display: -ms-flexbox;\r\n  display: flex;\n}\n@-webkit-keyframes loader {\nfrom {\r\n    -webkit-transform: rotate(0);\r\n            transform: rotate(0);\n}\nto {\r\n    -webkit-transform: rotate(360deg);\r\n            transform: rotate(360deg);\n}\n}\n@keyframes loader {\nfrom {\r\n    -webkit-transform: rotate(0);\r\n            transform: rotate(0);\n}\nto {\r\n    -webkit-transform: rotate(360deg);\r\n            transform: rotate(360deg);\n}\n}\n", ""]);
+exports.push([module.i, "\n.upload_input {\n    border: 1px solid black;\n    width : 300px;\n}\n.upload_button {\n    border: 1px solid black;\n    width: 100px;\n    height: 50px;\n    border-radius: 10px;\n    background-color: gray;\n    font-weight: bold;\n    font-size: 15px;\n}\n.contents {\r\n  text-align: center;\n}\n.attendanceCheckTitleEng {\r\n  color: white;\r\n  font-family: inherit;\n}\n.attendanceCheckTitleJap {\r\n  color: rgb(0, 0, 0);\r\n  font-size: 20px;\r\n  font-family: MS Gothic;\n}\n.custom-loader {\r\n  -webkit-animation: loader 1s infinite;\r\n          animation: loader 1s infinite;\r\n  display: -webkit-box;\r\n  display: -ms-flexbox;\r\n  display: flex;\n}\n@-webkit-keyframes loader {\nfrom {\r\n    -webkit-transform: rotate(0);\r\n            transform: rotate(0);\n}\nto {\r\n    -webkit-transform: rotate(360deg);\r\n            transform: rotate(360deg);\n}\n}\n@keyframes loader {\nfrom {\r\n    -webkit-transform: rotate(0);\r\n            transform: rotate(0);\n}\nto {\r\n    -webkit-transform: rotate(360deg);\r\n            transform: rotate(360deg);\n}\n}\n", ""]);
 
 // exports
 
@@ -71861,15 +72029,7 @@ var render = function() {
                                       ]),
                                       _vm._v(" "),
                                       _c(
-                                        "v-flex",
-                                        {
-                                          attrs: {
-                                            "d-flex": "",
-                                            xs12: "",
-                                            sm6: "",
-                                            md4: ""
-                                          }
-                                        },
+                                        "div",
                                         [
                                           _c(
                                             "v-chip",
@@ -71884,6 +72044,7 @@ var render = function() {
                                           _vm._v(" "),
                                           _c("input", {
                                             ref: "upload_file",
+                                            staticClass: "upload_input",
                                             attrs: {
                                               type: "file",
                                               id: "file",
@@ -71900,6 +72061,7 @@ var render = function() {
                                           _c(
                                             "button",
                                             {
+                                              staticClass: "upload_button",
                                               on: {
                                                 click: function($event) {
                                                   _vm.submitFile()
@@ -71924,7 +72086,7 @@ var render = function() {
                                                 color: "blue darken-1",
                                                 flat: ""
                                               },
-                                              nativeOn: {
+                                              on: {
                                                 click: function($event) {
                                                   _vm.dialog2 = false
                                                 }
@@ -71937,6 +72099,84 @@ var render = function() {
                                       )
                                     ],
                                     1
+                                  )
+                                ],
+                                1
+                              )
+                            ],
+                            1
+                          )
+                        ],
+                        1
+                      ),
+                      _vm._v(" "),
+                      _c(
+                        "v-dialog",
+                        {
+                          attrs: { persistent: "", "max-width": "600px" },
+                          model: {
+                            value: _vm.dialog3,
+                            callback: function($$v) {
+                              _vm.dialog3 = $$v
+                            },
+                            expression: "dialog3"
+                          }
+                        },
+                        [
+                          _c(
+                            "v-card",
+                            [
+                              _c("v-card-title", [
+                                _c("span", { staticClass: "headline" }, [
+                                  _vm._v("알림")
+                                ])
+                              ]),
+                              _vm._v(" "),
+                              _c(
+                                "v-flex",
+                                {
+                                  attrs: {
+                                    "d-flex": "",
+                                    xs12: "",
+                                    sm6: "",
+                                    md4: ""
+                                  }
+                                },
+                                [
+                                  _vm.reData
+                                    ? _c("div", [
+                                        _vm._v(
+                                          "\r\n                  성적 업로드에 성공하였습니다.\r\n                "
+                                        )
+                                      ])
+                                    : _c("div", [
+                                        _vm._v(
+                                          "\r\n                  성적 업로드에 실패하였습니다.\r\n                "
+                                        )
+                                      ])
+                                ]
+                              ),
+                              _vm._v(" "),
+                              _c(
+                                "v-card-actions",
+                                [
+                                  _c("v-spacer"),
+                                  _vm._v(" "),
+                                  _c(
+                                    "v-btn",
+                                    {
+                                      attrs: {
+                                        color: "blue darken-1",
+                                        flat: ""
+                                      },
+                                      on: {
+                                        click: function($event) {
+                                          ;(_vm.dialog3 = false),
+                                            (_vm.dialog2 = false)
+                                        }
+                                      }
+                                    },
+                                    [_vm._v("Close")]
                                   )
                                 ],
                                 1
@@ -72674,7 +72914,6 @@ if (false) {
 //
 //
 //
-//
 
 /* harmony default export */ __webpack_exports__["a"] = ({
   data: function data() {
@@ -72698,6 +72937,7 @@ if (false) {
   },
   mounted: function mounted() {
     this.getData();
+    setInterval(this.getData, 2500);
   },
 
   methods: {
@@ -72705,20 +72945,47 @@ if (false) {
       var _this = this;
 
       axios.get('/tutor/myclass/attendance').then(function (response) {
+        // 지각자
         _this.lateData = response.data.late_data;
-        _this.lateCount = _this.lateData.length;
+        if (_this.lateData == null) {
+          _this.lateCount = 0;
+        } else {
+          _this.lateCount = _this.lateData.length;
+        }
 
+        // 결석자
         _this.absenceData = response.data.absence_data;
-        _this.absenceCount = _this.absenceData.length;
+        if (_this.absenceData == null) {
+          _this.absenceCount = 0;
+        } else {
+          _this.absenceCount = _this.absenceData.length;
+        }
 
+        // 관심
         _this.loveStudentData = response.data.care_data;
-        _this.loveStudentCount = _this.loveStudentData.length;
+        if (_this.loveStudentData == null) {
+          _this.loveStudentCount = 0;
+        } else {
+          _this.loveStudentCount = _this.loveStudentData.length;
+        }
 
+        // 등교
         _this.attendanceData = response.data.attendance_data;
-        _this.attendanceCount = _this.attendanceData.length;
+        if (_this.attendaceData == 0) {
+          _this.attendanceCount = 0;
+        } else {
+          _this.attendanceCount = _this.attendanceData.length;
+        }
 
+        // 하교
         _this.returnHomeData = response.data.leave_data;
-        _this.returnHomeCount = _this.returnHomeData.length;
+        if (_this.returnHomeData == 0) {
+          _this.returnHomeCount = 0;
+        } else {
+          _this.returnHomeCount = _this.returnHomeData.length;
+        }
+
+        console.log('is new Data');
       }).catch(function (error) {
         console.log(error);
       });
@@ -72888,6 +73155,8 @@ if (false) {
 
     };
   }
+  /* Data End */
+
 });
 
 /***/ }),
@@ -74135,12 +74404,7 @@ var render = function() {
                                 [
                                   _c("v-card-title", [
                                     _c("div", [
-                                      _c("span", [
-                                        _vm._v(_vm._s(absence.name))
-                                      ]),
-                                      _c("br"),
-                                      _vm._v(" "),
-                                      _c("span", [_vm._v(_vm._s(absence.come))])
+                                      _c("span", [_vm._v(_vm._s(absence.name))])
                                     ])
                                   ])
                                 ],

@@ -210,7 +210,8 @@ export default {
     }
   },
   mounted() {
-      setInterval(this.getData, 5000);
+      this.getData();
+      setInterval(this.getData, 2500);
   },
   methods: {
     getData() {
