@@ -10,42 +10,53 @@ use App\Group;
  * 만든이:                         3-WDJ 8조 春目指す 1401213 이승민
  * 만든날:                         2018년 4월 02일
  */
-class SubjectsTableSeeder extends Seeder {
+class SubjectsTableSeeder extends Seeder
+{
     /**
      * Run the database seeds.
      *
      * @return void
      */
-    public function run() {
+    public function run()
+    {
         //
         //factory(Subject::class, 30)->create();
 
-        $groups = Group::all();
+        $group = Group::all()->all()[0];
+        // 전공 과목 - 분반 생성
+        $major = new Subject();
 
-        $groups->each(function($group) {
-            // 전공 과목 - 분반 생성
-            $major = new Subject();
+        $major->year            = 2018;
+        $major->term            = 1;
+        $major->group_id        = $group->id;
+        $major->id              = 11111111;
+        $major->name            = "웹 프로그래밍";
+        $major->division_flag   = true;
 
-            $major->year            = 2018;
-            $major->term            = 1;
-            $major->group_id        = $group->id;
-            $major->id              = random_int(10000000, 99999999);
-            $major->name            = "WEB PROGRAMMING";
-            $major->division_flag   = TRUE;
+        $major->save();
 
-            $major->save();
+        // 일본어 과목 - 분반 생성
+        $japanese = new Subject();
 
-            // 일본어 과목 - 단일
-            $japanese = new Subject();
+        $japanese->year             = 2018;
+        $japanese->term             = 1;
+        $japanese->group_id         = $group->id;
+        $japanese->id               = 22222222;
+        $japanese->name             = "실무 일본어";
+        $japanese->division_flag    = true;
 
-            $japanese->year            = 2018;
-            $japanese->term            = 1;
-            $japanese->group_id        = $group->id;
-            $japanese->id              = random_int(10000000, 99999999);
-            $japanese->name            = "BUSINESS JAPANESE";
-            $japanese->division_flag   = FALSE;
+        $japanese->save();
 
-            $japanese->save();
-        });
+        // 데이터베이스 => 단일과목
+        $db = new Subject();
+
+        $db->year            = 2018;
+        $db->term            = 1;
+        $db->group_id        = $group->id;
+        $db->id              = 33333333;
+        $db->name            = "데이터베이스설계";
+        $db->division_flag   = false;
+
+        $db->save();
     }
 }

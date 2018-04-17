@@ -11,15 +11,11 @@ class GroupsTableSeeder extends Seeder
      *
      * @return void
      */
-    public function run()
-    {
+    public function run() {
         //
-        $professors = Professor::getTutors();
-
-        $professors->each(function ($professor) {
-            $professor->group()->save(
-                factory(Group::class)->make()
-            );
-        });
+        Group::insert([
+            'tutor'     => 'tutor',
+            'name'      => '3-WDJ',
+        ]);
     }
 }

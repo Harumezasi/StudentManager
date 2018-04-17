@@ -256,7 +256,7 @@ export default {
           this.returnHomeCount  = this.returnHomeData.length;
         }
 
-        //console.log('is new Data');
+        console.log('is new Data');
 
       }).catch((error) => {
         console.log(error);

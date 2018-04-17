@@ -30,7 +30,7 @@ class ScoresTableSeeder extends Seeder {
                 // 유형이 과제 or 쪽지인 경우 무작위로 최대 4개 성적 정보 생성
                 $jCount = 0;
                 if($iCount > 2) {
-                    $jCount += random_int(1, 3);
+                    $jCount += random_int(2, 3);
                 }
 
                 // 과목 정보 생성

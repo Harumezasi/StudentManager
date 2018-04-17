@@ -21,27 +21,38 @@ class LecturesTableSeeder extends Seeder {
         // 과목 목록 구하기
         $subjects = Subject::all()->all();
 
-        // 교과목교수 구하기
-        $professors = Professor::getProfessors()->all();
-
         foreach($subjects as $subject) {
-            // 현재 강의가 개설된 반의 교과목 교수 목록 구하기
-            //    => 교과목교수의 관리자 ID가 해당 과목이 소속된 반의 지도교수 ID와 같을 시
-            $filteredProfessors = array_filter($professors, function ($value) use ($subject) {
-                return $value->manager == $subject->group()->get()[0]->tutor;
-            });
-
             $loop_count = $subject->division_flag ? 2 : 1;
             for ($iCount = 0; $iCount < $loop_count; $iCount++) {
+                // 교수 배정
+                $professor = null;
+                if($subject->id == 11111111) {
+                    // 전공 과목 => 분반
+                    if($iCount == 0) {
+                        $professor = 'prof5';
+                    } else {
+                        $professor = 'prof2';
+                    }
+                } else if($subject->id == 22222222) {
+                    // 일본어 과목 => 분반
+                    if($iCount == 0) {
+                        $professor = 'prof3';
+                    } else {
+                        $professor = 'prof1';
+                    }
+                } else if($subject->id == 33333333){
+                    // DB 과목 => 단일
+                    $professor = 'prof4';
+                }
+
                 $lecture = new Lecture();
 
-                $lecture->subject_id = $subject->id;
-                $lecture->divided_class_id = $subject->division_flag ? chr($iCount + 65) : NULL;
-                $lecture->professor = $professors[array_keys($filteredProfessors)[0]]->id;
-                array_splice($professors, array_keys($filteredProfessors)[0], 1);
+                $lecture->subject_id        = $subject->id;
+                $lecture->divided_class_id  = $subject->division_flag ? chr($iCount + 65) : NULL;
+                $lecture->professor         = $professor;
 
                 $lecture->save();
             }
-        };
+        }
     }
 }

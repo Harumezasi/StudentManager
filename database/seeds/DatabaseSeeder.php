@@ -26,7 +26,6 @@ class DatabaseSeeder extends Seeder
         if(config('database.default') !== 'sqlite') {
             DB::statement('SET FOREIGN_KEY_CHECKS=0');
         }
-
         // 더미 데이터 삽입 시더
         Professor::truncate();
         $this->call(ProfessorsTableSeeder::class);
@@ -49,6 +48,7 @@ class DatabaseSeeder extends Seeder
 
         Classroom::truncate();
         $this->call(ClassroomsTableSeeder::class);
+
 
         Subject::truncate();
         $this->call(SubjectsTableSeeder::class);
