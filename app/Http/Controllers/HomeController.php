@@ -52,13 +52,15 @@ class HomeController extends Controller {
             return redirect(route("{$user_type}.index"));
         }
 
+        /*
         // 02. 데이터 바인딩
         $data = [
             'title'         => __('page_title.home_index'),
             'user_type'     => ConstantEnum::USER_TYPE
-        ];
+        ];*/
 
 
+        //return view('login', $data);
         return view('welcome');
     }
 
@@ -135,12 +137,15 @@ class HomeController extends Controller {
      * 만든날:                         2018년 3월 18일
      *
      * 매개변수 목록
-     * @param $request:
+     * @param Request $request :                요청
      *
      * 지역변수 목록
      * $data(array):                   View 단에 전달하는 매개인자를 저장하는 배열
      *      $title(string):            HTML Title
      *      $type(string):             현재 회원가입 유형을 알림
+     *
+     * @return \Illuminate\Http\JsonResponse
+     * @throws NotAccessibleException
      */
     public function login(Request $request) {
         // 데이터 유효성 검증
