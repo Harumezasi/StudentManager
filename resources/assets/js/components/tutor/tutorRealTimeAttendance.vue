@@ -75,8 +75,7 @@
                 <v-chip color = "red" v-for="absence in absenceData" :key="absence.name" class="studentInfoArea">
                   <v-card-title>
                     <div>
-                      <span>{{ absence.name }}</span><br>
-                      <span>{{ absence.come }}</span>
+                      <span>{{ absence.name }}</span>
                     </div>
                   </v-card-title>
                 </v-chip>
@@ -211,26 +210,54 @@ export default {
     }
   },
   mounted() {
-      this.getData();
+      setInterval(this.getData, 5000);
   },
   methods: {
     getData() {
       axios.get('/tutor/myclass/attendance')
       .then((response) => {
-        this.lateData         = response.data.late_data;
-        this.lateCount        = this.lateData.length;
+        // 지각자
+        this.lateData           = response.data.late_data;
+        if(this.lateData == null){
+          this.lateCount        = 0;
+        } else {
+          this.lateCount        = this.lateData.length;
+        }
 
-        this.absenceData      = response.data.absence_data;
-        this.absenceCount     = this.absenceData.length;
+        // 결석자
+        this.absenceData        = response.data.absence_data;
+        if(this.absenceData == null){
+          this.absenceCount     = 0;
+        }else{
+          this.absenceCount     = this.absenceData.length;
+        }
 
-        this.loveStudentData  = response.data.care_data;
-        this.loveStudentCount = this.loveStudentData.length;
+        // 관심
+        this.loveStudentData    = response.data.care_data;
+        if(this.loveStudentData == null){
+          this.loveStudentCount = 0;
+        } else {
+          this.loveStudentCount = this.loveStudentData.length;
+        }
 
-        this.attendanceData   = response.data.attendance_data;
-        this.attendanceCount  = this.attendanceData.length;
+        // 등교
+        this.attendanceData     = response.data.attendance_data;
+        if(this.attendaceData == 0){
+          this.attendanceCount  = 0;
+        } else {
+          this.attendanceCount  = this.attendanceData.length;
+        }
 
-        this.returnHomeData   = response.data.leave_data;
-        this.returnHomeCount  = this.returnHomeData.length;
+        // 하교
+        this.returnHomeData     = response.data.leave_data;
+        if(this.returnHomeData == 0){
+          this.returnHomeCount  = 0;
+        } else {
+          this.returnHomeCount  = this.returnHomeData.length;
+        }
+
+        //console.log('is new Data');
+
       }).catch((error) => {
         console.log(error);
       });

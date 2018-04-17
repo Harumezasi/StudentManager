@@ -374,7 +374,7 @@ class TutorController extends Controller {
         }
 
         // 데이터 획득 전 사전 정보 획득
-        $professor      = Professor::find($request->post('id'));            // 교수 모델 접근
+        $professor      = Professor::find($request->get('id'));            // 교수 모델 접근
         $studentsList   = $professor->selectMyStudentsList()->get()->all();      // 내 학생 리스트 가져오기
         $attendanceList = [];
 

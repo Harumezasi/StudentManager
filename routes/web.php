@@ -178,7 +178,7 @@ Route::name('tutor.')->group(function() {
         Route::post('/myclass/student_list', 'TutorController@getMyStudentsListAtAndroid');
 
         // 모바일 - 오늘자 출석기록 조회
-        Route::post('/myclass/today_attendance', 'TutorController@getAttendanceRecordsOfTodayAtMobile');
+        Route::get('/myclass/today_attendance', 'TutorController@getAttendanceRecordsOfTodayAtMobile');
 
         // 지도교수 로그인 이후 이용 가능 기능
         Route::middleware(['check.login'])->group(function() {
