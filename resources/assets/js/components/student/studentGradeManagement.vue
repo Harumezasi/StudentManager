@@ -94,6 +94,12 @@ table {
   font-size: 15px;
   font-weight: bold;
 }
+
+img {
+  width:  200px;
+  height: 250px;
+}
+
 td {
   border: 1px solid black;
 }
