@@ -6,6 +6,12 @@
  * 만든날:            2018년 3월 28일
  */
 return [
+    // 공통 정보
+    'title'                 => '계정관리',
+    'myinfo'                => '내 정보',
+    'myinfo_update'         => '계정정보 수정',
+    'account_sync_manage'   => '간편계정 관리',
+
     // 회원 유형
     "student"           => "학생",
     "professor"         => "교수",

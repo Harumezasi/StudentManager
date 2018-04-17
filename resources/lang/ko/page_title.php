@@ -16,14 +16,27 @@ return [
 
     // 02. 학생 컨트롤러에서 제공하는 페이지
     'student_index'             => '학생: 홈페이지',
+    'student_info'              => '학생: 계정관리',
     'student_attendance'        => '학생: 출결관리',
-    'student_lecture_main'      => "학생: 학업관리 메인",
-    'student_lecture_details'   => '학생: :name 상세',
+    'student_lecture'           => "학생: 학업관리",
+    'student_counsel'           => "학생: 상담관리",
 
     // 03. 지도교수 컨트롤러에서 제공하는 페이지
-    'tutor_index'           => "지도교수: 홈페이지",
-    'tutor_myclass_create'  => '지도교수: 내 지도반 만들기',
+    'tutor_index'               => "지도교수: 홈페이지",
+
+    'tutor_myclass_create'      => '지도교수: 내 지도반 만들기',
+    'tutor_myclass_manage'      => '지도교수: 내 지도학생 관리',
 
     // 04. 교과목교수 컨트롤러에서 제공하는 페이지
-    'professor_index'       => '교과목교수: 홈페이지',
+    'professor_index'               => '교과목교수: 홈페이지',
+    'professor_myinfo_read'         => '교과목교수: 내 정보 확인',
+    'professor_myinfo_update'       => '교과목교수: 정보 수정',
+    'professor_myinfo_account'      => '교과목교수: 간편계정 관리',
+
+    'professor_my_student_details'  => '교과목교수: :name 학생 상세정보',
+    'professor_check_attendance'    => '교과목교수: 출석체크',
+
+    'professor_score_store_main'    => '교과목교수: 성적등록',
+
+    'professor_counsel'             => '교과목교수: 상담관리',
 ];
