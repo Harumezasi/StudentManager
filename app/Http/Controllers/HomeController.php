@@ -266,4 +266,14 @@ class HomeController extends Controller {
 
         return redirect()->back();
     }
+
+    // 테스트
+
+    public function session() {
+        return response()->json(session()->all(), 200);
+    }
+
+    public function request(Request $request) {
+        return response()->json(['header' => $request->header(), 'body' => $request->all()], 200);
+    }
 }

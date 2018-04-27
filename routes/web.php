@@ -11,6 +11,25 @@
 |
 */
 /**
+ *  ## 테스트용
+ */
+
+Route::name('test.')->group(function() {
+    // 세션 정보 호출
+    Route::get('/session', [
+        'as'    => 'session',
+        'uses'  => 'HomeController@session',
+    ]);
+
+    // 요청 정보 확인
+    Route::match(['GET', 'POST'], '/request', [
+        'as'    => 'session',
+        'uses'  => 'HomeController@request',
+    ]);
+});
+
+
+/**
  *  01. 홈 화면 라우팅
  */
 Route::name('home.')->group(function() {
