@@ -82,7 +82,7 @@ class AttendancesTableSeeder extends Seeder
         }
 
         // 4월 출석기록 생성
-        for ($iCount = 19; $iCount <= 28; $iCount++) {
+        for ($iCount = 1; $iCount <= 28; $iCount++) {
             foreach ($students as $student) {
                 // 현재 일자 구하기
                 $nowDate = Carbon::createFromDate($today->year, 4, $iCount);
