@@ -207,6 +207,12 @@ Route::name('tutor.')->group(function() {
         // 모바일 - 오늘자 출석기록 조회
         Route::get('/myclass/today_attendance', 'TutorController@getAttendanceRecordsOfTodayAtMobile');
 
+        // 오늘자 등/하교 출력
+        Route::get('/myclass/attendance', [
+            'as'    => 'myclass.attendance',
+            'uses'  => 'TutorController@getAttendanceRecordsOfToday'
+        ]);
+
         // 지도교수 로그인 이후 이용 가능 기능
         Route::middleware(['check.login'])->group(function() {
 
@@ -250,11 +256,7 @@ Route::name('tutor.')->group(function() {
                 'uses'  => 'TutorController@manageMyClass'
             ]);
 
-            // 오늘자 등/하교 출력
-            Route::get('/myclass/attendance', [
-                'as'    => 'myclass.attendance',
-                'uses'  => 'TutorController@getAttendanceRecordsOfToday'
-            ]);
+
 
 
             // 학생 상세정보 => 출결 확인
